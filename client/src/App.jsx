@@ -1,41 +1,37 @@
-import { Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import AdminDashboard from "./pages/Admin";
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { ToastProvider } from "./components/ToastProvider";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from '../src/contexts/AuthContext';
+import { ThemeProvider } from '../src/contexts/ThemeContext';
 
+// Pages
+import Login from '../src/pages/auth/Login';
+import Register from '../src/pages/auth/Register';
+import Home from '../src/pages/Home';
+import Discover from '../src/pages/Discover';
+import Profile from '../src/pages/Profile';
+import LearningPlan from '../src/pages/LearningPlan';
+import Progress from '../src/pages/Progress';
+import Notifications from '../src/pages/Notifications';
+import Admin from '../src/pages/Admin';
 
 const App = () => {
-    return (
-        <div className="pt-20">
-            <ToastProvider>
-                <Navbar />
-                <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<Login />} />
-
-                    {/* Protected Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={["Admin", "User"]} />}>
-                        <Route path="/home" element={<Home />} />
-                        
-                    </Route>
-
-                    {/* Role-Specific Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={["Admin"]} />}>
-                        <Route path="/admin" element={<AdminDashboard />} />
-                    </Route>
-
-                    
-
-                    
-
-                    
-                </Routes>
-            </ToastProvider>
-        </div>
-    );
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/plan" element={<LearningPlan />} />
+          <Route path="/progress" element={<Progress />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
+  );
 };
 
 export default App;

@@ -1,36 +1,37 @@
-
-import { useEffect, useState } from 'react';
+import React from 'react';
+import AppShell from '../components/layout/AppShell';
+import PostCard from '../components/ui/PostCard';
+import { dummyPosts } from '../data/dummyPosts';
 
 const Home = () => {
-    const [user, setUser] = useState(null);
+return (
+<AppShell>
+<div className="space-y-8">
+<div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6">
+<h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, Alex!</h1>
+<p className="text-gray-600 dark:text-gray-300">Ready to continue your learning journey?</p>
+<div className="mt-4 flex space-x-4">
+<button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+Continue Learning
+</button>
+<button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600">
+Explore New Skills
+</button>
+</div>
+</div>
 
-    useEffect(() => {
-        const userData = JSON.parse(localStorage.getItem('user'));
-        setUser(userData);
-    }, []);
 
-    return (
-        <div className="p-8 max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6">Welcome to Gate Pass Management</h1>
-            
-            {user && (
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-semibold mb-4">User Details</h2>
-                    <div className="space-y-2">
-                        <p><span className="font-medium">User Type:</span> {user.userType}</p>
-                        <p><span className="font-medium">User ID:</span> {user.userId}</p>
-                        <p><span className="font-medium">Name:</span> {user.name}</p>
-                        <p><span className="font-medium">Service No:</span> {user.serviceNo}</p>
-                        <p><span className="font-medium">Designation:</span> {user.designation}</p>
-                        <p><span className="font-medium">Section:</span> {user.section}</p>
-                        <p><span className="font-medium">Group:</span> {user.group}</p>
-                        <p><span className="font-medium">Contact No:</span> {user.contactNo}</p>
-                        <p><span className="font-medium">Role:</span> {user.role}</p>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Your Feed</h2>
+      <div className="space-y-6">
+        {dummyPosts.map(post => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
+    </div>
+  </div>
+</AppShell>
+);
 };
 
 export default Home;
