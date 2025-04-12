@@ -40,6 +40,10 @@ public class LearningPlan {
     
     @Column(name = "status", nullable = false, length = 20)
     private String status = "active";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -19,8 +19,9 @@ public class Media {
     @Column(name = "media_id")
     private int mediaId;
     
-    @Column(name = "post_id", insertable = false, updatable = false)
-    private int postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
     
     @Column(name = "file_path", nullable = false)
     private String filePath;
@@ -31,9 +32,6 @@ public class Media {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
     
     @PrePersist
     protected void onCreate() {

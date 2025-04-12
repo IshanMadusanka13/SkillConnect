@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface AdminMessageRepository extends JpaRepository<AdminMessage, int> {
-    List<AdminMessage> findByAdmin(User admin);
+public interface AdminMessageRepository extends JpaRepository<AdminMessage, Integer> {
+    List<AdminMessage> findByAdmin_UserId(int userid);
     List<AdminMessage> findByAdminOrderByCreatedAtDesc(User admin);
 }

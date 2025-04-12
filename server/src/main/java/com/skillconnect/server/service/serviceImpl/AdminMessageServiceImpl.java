@@ -1,4 +1,4 @@
-package com.skillconnect.server.service.impl;
+package com.skillconnect.server.service.serviceImpl;
 
 import com.skillconnect.server.model.AdminMessage;
 import com.skillconnect.server.model.User;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.log4j.Log4j2;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,18 +31,18 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     }
     
     @Override
-    public AdminMessage createMessage(AdminMessage message, Long adminId) {
-        log.info("Creating new admin message by admin ID: {}", adminId);
+    public AdminMessage createMessage(AdminMessage message) {
+        log.info("Creating new admin message by admin ID: {}", message.getAdmin().getUserId());
         
-        User admin = userRepository.findById(adminId)
+        User admin = userRepository.findById(message.getAdmin().getUserId())
                 .orElseThrow(() -> {
-                    log.error("Admin user not found with ID: {}", adminId);
-                    return new RuntimeException("Admin user not found with id: " + adminId);
+                    log.error("Admin user not found with ID: {}", message.getAdmin().getUserId());
+                    return new RuntimeException("Admin user not found with id: " + message.getAdmin().getUserId());
                 });
         
         // Verify the user is an admin (assuming there's a role field)
         if (!admin.getRole().equals("ADMIN")) {
-            log.error("User with ID: {} is not an admin", adminId);
+            log.error("User with ID: {} is not an admin", message.getAdmin().getUserId());
             throw new RuntimeException("User is not authorized to create admin messages");
         }
         
@@ -51,14 +50,14 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         // The @PrePersist will handle setting createdAt
         
         AdminMessage savedMessage = adminMessageRepository.save(message);
-        log.info("Admin message created successfully with ID: {}", savedMessage.getId());
+        log.info("Admin message created successfully with ID: {}", savedMessage.getMessageId());
         return savedMessage;
     }
     
     @Override
-    public Optional<AdminMessage> findById(Long messageId) {
-        log.debug("Finding admin message by ID: {}", messageId);
-        return adminMessageRepository.findById(messageId);
+    public Optional<AdminMessage> findById(AdminMessage message) {
+        log.debug("Finding admin message by ID: {}", message.getMessageId());
+        return adminMessageRepository.findById(message.getMessageId());
     }
     
     @Override
@@ -70,79 +69,31 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     }
     
     @Override
-    public List<AdminMessage> findMessagesByAdminId(Long adminId) {
-        log.debug("Finding admin messages by admin ID: {}", adminId);
-        List<AdminMessage> messages = adminMessageRepository.findByAdminId(adminId);
-        log.debug("Found {} messages by admin ID: {}", messages.size(), adminId);
+    public List<AdminMessage> findMessagesByAdminId(AdminMessage message) {
+        log.debug("Finding admin messages by admin ID: {}", message.getAdmin().getUserId());
+        List<AdminMessage> messages = adminMessageRepository.findByAdmin_UserId(message.getAdmin().getUserId());
+        log.debug("Found {} messages by admin ID: {}", messages.size(), message.getAdmin().getUserId());
         return messages;
     }
     
     @Override
     public AdminMessage updateMessage(AdminMessage message) {
-        log.info("Updating admin message with ID: {}", message.getId());
-        if (!adminMessageRepository.existsById(message.getId())) {
-            log.error("Admin message not found with ID: {}", message.getId());
-            throw new RuntimeException("Admin message not found with id: " + message.getId());
+        log.info("Updating admin message with ID: {}", message.getMessageId());
+        if (!adminMessageRepository.existsById(message.getMessageId())) {
+            log.error("Admin message not found with ID: {}", message.getMessageId());
+            throw new RuntimeException("Admin message not found with id: " + message.getMessageId());
         }
         
         AdminMessage updatedMessage = adminMessageRepository.save(message);
-        log.info("Admin message updated successfully: {}", message.getId());
+        log.info("Admin message updated successfully: {}", message.getMessageId());
         return updatedMessage;
     }
     
     @Override
-    public void deleteMessage(Long messageId) {
+    public void deleteMessage(int messageId) {
         log.info("Deleting admin message with ID: {}", messageId);
         adminMessageRepository.deleteById(messageId);
         log.info("Admin message deleted successfully: {}", messageId);
     }
     
-    @Override
-    public List<AdminMessage> findActiveMessages() {
-        log.debug("Finding active admin messages");
-        LocalDateTime now = LocalDateTime.now();
-        List<AdminMessage> activeMessages = adminMessageRepository.findByActiveAndExpiryDateAfter(true, now);
-        log.debug("Found {} active admin messages", activeMessages.size());
-        return activeMessages;
-    }
-    
-    @Override
-    public AdminMessage setMessageActive(Long messageId, boolean active) {
-        log.info("Setting admin message ID: {} active status to: {}", messageId, active);
-        
-        AdminMessage message = adminMessageRepository.findById(messageId)
-                .orElseThrow(() -> {
-                    log.error("Admin message not found with ID: {}", messageId);
-                    return new RuntimeException("Admin message not found with id: " + messageId);
-                });
-        
-        message.setActive(active);
-        AdminMessage updatedMessage = adminMessageRepository.save(message);
-        log.info("Admin message active status updated successfully: {}", messageId);
-        return updatedMessage;
-    }
-    
-    @Override
-    public AdminMessage setMessageExpiryDate(Long messageId, LocalDateTime expiryDate) {
-        log.info("Setting admin message ID: {} expiry date to: {}", messageId, expiryDate);
-        
-        AdminMessage message = adminMessageRepository.findById(messageId)
-                .orElseThrow(() -> {
-                    log.error("Admin message not found with ID: {}", messageId);
-                    return new RuntimeException("Admin message not found with id: " + messageId);
-                });
-        
-        message.setExpiryDate(expiryDate);
-        AdminMessage updatedMessage = adminMessageRepository.save(message);
-        log.info("Admin message expiry date updated successfully: {}", messageId);
-        return updatedMessage;
-    }
-    
-    @Override
-    public List<AdminMessage> findMessagesByPriority(String priority) {
-        log.debug("Finding admin messages by priority: {}", priority);
-        List<AdminMessage> messages = adminMessageRepository.findByPriority(priority);
-        log.debug("Found {} messages with priority: {}", messages.size(), priority);
-        return messages;
-    }
 }

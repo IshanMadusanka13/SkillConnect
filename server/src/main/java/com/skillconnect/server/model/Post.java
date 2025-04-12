@@ -20,8 +20,9 @@ public class Post {
     @Column(name = "post_id")
     private int postId;
     
-    @Column(name = "user_id", insertable = false, updatable = false)
-    private int userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -31,10 +32,6 @@ public class Post {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
     
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Media> mediaList;

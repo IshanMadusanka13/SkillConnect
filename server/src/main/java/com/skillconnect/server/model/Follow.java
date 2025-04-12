@@ -18,16 +18,7 @@ public class Follow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "follow_id")
     private int followId;
-    
-    @Column(name = "follower_id", insertable = false, updatable = false)
-    private int followerId;
-    
-    @Column(name = "following_id", insertable = false, updatable = false)
-    private int followingId;
-    
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id", nullable = false)
     private User follower;
@@ -35,6 +26,9 @@ public class Follow {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id", nullable = false)
     private User following;
+    
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
     
     @PrePersist
     protected void onCreate() {

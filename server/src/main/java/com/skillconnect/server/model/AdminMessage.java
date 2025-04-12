@@ -19,8 +19,8 @@ public class AdminMessage {
     @Column(name = "message_id")
     private int messageId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = false)
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "user_id")
     private User admin;
     
     @Column(name = "title", nullable = false, length = 100)

@@ -1,24 +1,23 @@
 package com.skillconnect.server.service;
 
+import com.skillconnect.server.model.LearningPlan;
 import com.skillconnect.server.model.LearningUpdate;
-import com.skillconnect.server.model.User;
+import com.skillconnect.server.model.UpdateTemplate;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface LearningUpdateService {
+
+    LearningUpdate createUpdateFromTemplate(UpdateTemplate template, LearningPlan plan);
+
+    LearningUpdate createUpdate(LearningUpdate update, int planId);
     
-    LearningUpdate saveLearningUpdate(LearningUpdate learningUpdate);
+    Optional<LearningUpdate> findById(int updateId);
     
-    Optional<LearningUpdate> findById(Long updateId);
-    
-    List<LearningUpdate> findLearningUpdatesByUser(User user);
-    
-    List<LearningUpdate> findLearningUpdatesByUserId(Long userId);
+    List<LearningUpdate> findUpdatesByUserId(int userId);
     
     LearningUpdate updateLearningUpdate(LearningUpdate learningUpdate);
     
-    void deleteLearningUpdate(Long updateId);
-    
-    boolean isUpdateOwner(Long updateId, Long userId);
+    void deleteUpdate(int updateId);
 }

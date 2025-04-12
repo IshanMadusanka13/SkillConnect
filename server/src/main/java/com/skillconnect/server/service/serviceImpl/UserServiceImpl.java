@@ -1,4 +1,4 @@
-package com.skillconnect.server.service.impl;
+package com.skillconnect.server.service.serviceImpl;
 
 import com.skillconnect.server.model.Follow;
 import com.skillconnect.server.model.User;
@@ -40,12 +40,12 @@ public class UserServiceImpl implements UserService {
         // Encode password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        log.info("User saved successfully with ID: {}", savedUser.getId());
+        log.info("User saved successfully with ID: {}", savedUser.getUserId());
         return savedUser;
     }
 
     @Override
-    public Optional<User> findById(Long userId) {
+    public Optional<User> findById(int userId) {
         log.debug("Finding user by ID: {}", userId);
         return userRepository.findById(userId);
     }
@@ -54,8 +54,10 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         log.debug("Finding user by email: {}", email);
         try {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                throw new RuntimeException("User not found with email: " + email);
+            }
             log.debug("User found with email: {}", email);
             return user;
         } catch (RuntimeException e) {
@@ -63,6 +65,7 @@ public class UserServiceImpl implements UserService {
             throw e;
         }
     }
+    
 
     @Override
     public List<User> findAllUsers() {
@@ -74,19 +77,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(User user) {
-        log.info("Updating user with ID: {}", user.getId());
+        log.info("Updating user with ID: {}", user.getUserId());
         // Check if user exists
-        if (!userRepository.existsById(user.getId())) {
-            log.error("User not found with ID: {}", user.getId());
-            throw new RuntimeException("User not found with id: " + user.getId());
+        if (!userRepository.existsById(user.getUserId())) {
+            log.error("User not found with ID: {}", user.getUserId());
+            throw new RuntimeException("User not found with id: " + user.getUserId());
         }
         User updatedUser = userRepository.save(user);
-        log.info("User updated successfully: {}", user.getId());
+        log.info("User updated successfully: {}", user.getUserId());
         return updatedUser;
     }
 
     @Override
-    public void deleteUser(Long userId) {
+    public void deleteUser(int userId) {
         log.info("Deleting user with ID: {}", userId);
         userRepository.deleteById(userId);
         log.info("User deleted successfully: {}", userId);
@@ -109,14 +112,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getFollowers(Long userId) {
+    public List<User> getFollowers(int userId) {
         log.debug("Getting followers for user ID: {}", userId);
         // Get all follows where the target user is the specified user
-        List<Follow> followers = followRepository.findByFollowedId(userId);
+        List<Follow> followers = followRepository.findByFollower_userid(userId);
         
         // Extract the follower users from the follows
         List<User> followerUsers = followers.stream()
-                .map(follow -> userRepository.findById(follow.getFollower().getId()))
+                .map(follow -> userRepository.findById(follow.getFollower().getUserId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -126,14 +129,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getFollowing(Long userId) {
+    public List<User> getFollowing(int userId) {
         log.debug("Getting following for user ID: {}", userId);
-        // Get all follows where the follower is the specified user
-        List<Follow> following = followRepository.findByFollowerId(userId);
+        List<Follow> following = followRepository.findByFollowing_userid(userId);
         
-        // Extract the followed users from the follows
         List<User> followingUsers = following.stream()
-                .map(follow -> userRepository.findById(follow.getFollowed().getId()))
+                .<Optional<User>>map(follow -> userRepository.findById(follow.getFollowing().getUserId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -143,7 +144,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateProfile(Long userId, String firstName, String lastName, String bio, String profileImage) {
+    public User updateProfile(int userId, String firstName, String lastName, String bio, String profileImage) {
         log.info("Updating profile for user ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
@@ -177,7 +178,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePassword(Long userId, String currentPassword, String newPassword) {
+    public boolean changePassword(int userId, String currentPassword, String newPassword) {
         log.info("Attempting to change password for user ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {

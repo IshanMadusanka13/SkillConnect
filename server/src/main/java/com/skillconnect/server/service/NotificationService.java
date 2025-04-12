@@ -1,28 +1,25 @@
 package com.skillconnect.server.service;
 
 import com.skillconnect.server.model.Notification;
-import com.skillconnect.server.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface NotificationService {
     
-    Notification saveNotification(Notification notification);
+    Notification createNotification(Notification notification);
+
+    List<Notification> findUnreadNotificationsByUserId(int userId);
+
+    void deleteAllNotifications(int userId);
     
-    Notification createNotification(Long userId, String type, Long fromUserId, Long postId, Long commentId, String content);
+    Optional<Notification> findById(int notificationId);
     
-    Optional<Notification> findById(Long notificationId);
+    List<Notification> findNotificationsByUserId(int userId);
     
-    List<Notification> findNotificationsByUser(User user);
+    void markAsRead(int notificationId);
     
-    List<Notification> findNotificationsByUserId(Long userId);
+    void markAllAsRead(int userId);
     
-    List<Notification> findUnreadNotificationsByUser(User user);
-    
-    void markAsRead(Long notificationId);
-    
-    void markAllAsRead(Long userId);
-    
-    void deleteNotification(Long notificationId);
+    void deleteNotification(int notificationId);
 }

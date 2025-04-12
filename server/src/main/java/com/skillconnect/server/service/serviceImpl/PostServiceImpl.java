@@ -1,4 +1,4 @@
-package com.skillconnect.server.service.impl;
+package com.skillconnect.server.service.serviceImpl;
 
 import com.skillconnect.server.model.Post;
 import com.skillconnect.server.model.User;
@@ -30,32 +30,32 @@ public class PostServiceImpl implements PostService {
     }
     
     @Override
-    public Post createPost(Post post, Long userId) {
-        log.info("Creating new post for user ID: {}", userId);
-        User user = userRepository.findById(userId)
+    public Post createPost(Post post) {
+        log.info("Creating new post for user ID: {}", post.getUser().getUserId());
+        User user = userRepository.findById(post.getUser().getUserId())
                 .orElseThrow(() -> {
-                    log.error("User not found with ID: {}", userId);
-                    return new RuntimeException("User not found with id: " + userId);
+                    log.error("User not found with ID: {}", post.getUser().getUserId());
+                    return new RuntimeException("User not found with id: " + post.getUser().getUserId());
                 });
         
         post.setUser(user);
         post.setCreatedAt(LocalDateTime.now());
         
         Post savedPost = postRepository.save(post);
-        log.info("Post created successfully with ID: {}", savedPost.getId());
+        log.info("Post created successfully with ID: {}", savedPost.getPostId());
         return savedPost;
     }
     
     @Override
-    public Optional<Post> findById(Long postId) {
+    public Optional<Post> findById(int postId) {
         log.debug("Finding post by ID: {}", postId);
         return postRepository.findById(postId);
     }
     
     @Override
-    public List<Post> findPostsByUserId(Long userId) {
+    public List<Post> findPostsByUserId(int userId) {
         log.debug("Finding posts for user ID: {}", userId);
-        List<Post> posts = postRepository.findByUserId(userId);
+        List<Post> posts = postRepository.findByUser_UserId(userId);
         log.debug("Found {} posts for user ID: {}", posts.size(), userId);
         return posts;
     }
@@ -70,18 +70,18 @@ public class PostServiceImpl implements PostService {
     
     @Override
     public Post updatePost(Post post) {
-        log.info("Updating post with ID: {}", post.getId());
-        if (!postRepository.existsById(post.getId())) {
-            log.error("Post not found with ID: {}", post.getId());
-            throw new RuntimeException("Post not found with id: " + post.getId());
+        log.info("Updating post with ID: {}", post.getPostId());
+        if (!postRepository.existsById(post.getPostId())) {
+            log.error("Post not found with ID: {}", post.getPostId());
+            throw new RuntimeException("Post not found with id: " + post.getPostId());
         }
         Post updatedPost = postRepository.save(post);
-        log.info("Post updated successfully: {}", post.getId());
+        log.info("Post updated successfully: {}", post.getPostId());
         return updatedPost;
     }
     
     @Override
-    public void deletePost(Long postId) {
+    public void deletePost(int postId) {
         log.info("Deleting post with ID: {}", postId);
         postRepository.deleteById(postId);
         log.info("Post deleted successfully: {}", postId);
