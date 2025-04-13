@@ -22,23 +22,18 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, 
-                          FollowRepository followRepository,
-                          PasswordEncoder passwordEncoder) {
+                          FollowRepository followRepository) {
         this.userRepository = userRepository;
         this.followRepository = followRepository;
-        this.passwordEncoder = passwordEncoder;
         log.info("UserServiceImpl initialized");
     }
 
     @Override
     public User saveUser(User user) {
         log.info("Saving new user with email: {}", user.getEmail());
-        // Encode password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         log.info("User saved successfully with ID: {}", savedUser.getUserId());
         return savedUser;
@@ -65,7 +60,6 @@ public class UserServiceImpl implements UserService {
             throw e;
         }
     }
-    
 
     @Override
     public List<User> findAllUsers() {
@@ -73,19 +67,6 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll();
         log.debug("Found {} users", users.size());
         return users;
-    }
-
-    @Override
-    public User updateUser(User user) {
-        log.info("Updating user with ID: {}", user.getUserId());
-        // Check if user exists
-        if (!userRepository.existsById(user.getUserId())) {
-            log.error("User not found with ID: {}", user.getUserId());
-            throw new RuntimeException("User not found with id: " + user.getUserId());
-        }
-        User updatedUser = userRepository.save(user);
-        log.info("User updated successfully: {}", user.getUserId());
-        return updatedUser;
     }
 
     @Override
@@ -112,68 +93,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getFollowers(int userId) {
-        log.debug("Getting followers for user ID: {}", userId);
-        // Get all follows where the target user is the specified user
-        List<Follow> followers = followRepository.findByFollower_userid(userId);
-        
-        // Extract the follower users from the follows
-        List<User> followerUsers = followers.stream()
-                .map(follow -> userRepository.findById(follow.getFollower().getUserId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-        
-        log.debug("Found {} followers for user ID: {}", followerUsers.size(), userId);
-        return followerUsers;
-    }
-
-    @Override
-    public List<User> getFollowing(int userId) {
-        log.debug("Getting following for user ID: {}", userId);
-        List<Follow> following = followRepository.findByFollowing_userid(userId);
-        
-        List<User> followingUsers = following.stream()
-                .<Optional<User>>map(follow -> userRepository.findById(follow.getFollowing().getUserId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-        
-        log.debug("Found {} following for user ID: {}", followingUsers.size(), userId);
-        return followingUsers;
-    }
-
-    @Override
-    public User updateProfile(int userId, String firstName, String lastName, String bio, String profileImage) {
-        log.info("Updating profile for user ID: {}", userId);
-        User user = userRepository.findById(userId)
+    public User updateUser(int userid, User user) {
+        log.info("Updating profile for user ID: {}", userid);
+        User userExist = userRepository.findById(userid)
                 .orElseThrow(() -> {
-                    log.error("User not found with ID: {}", userId);
-                    return new RuntimeException("User not found with id: " + userId);
+                    log.error("User not found with ID: {}", userid);
+                    return new RuntimeException("User not found with id: " + userid);
                 });
         
-        if (firstName != null) {
-            log.debug("Updating first name for user ID: {}", userId);
-            user.setFirstName(firstName);
+        if (user.getFirstName() != null) {
+            log.debug("Updating first name for user ID: {}", userid);
+            userExist.setFirstName(user.getFirstName());
         }
         
-        if (lastName != null) {
-            log.debug("Updating last name for user ID: {}", userId);
-            user.setLastName(lastName);
+        if (user.getLastName() != null) {
+            log.debug("Updating last name for user ID: {}", userid);
+            userExist.setLastName(user.getLastName());
         }
         
-        if (bio != null) {
-            log.debug("Updating bio for user ID: {}", userId);
-            user.setBio(bio);
+        if (user.getBio() != null) {
+            log.debug("Updating bio for user ID: {}", userid);
+            userExist.setBio(user.getBio());
         }
         
-        if (profileImage != null) {
-            log.debug("Updating profile image for user ID: {}", userId);
-            user.setProfileImage(profileImage);
+        if (user.getProfileImage() != null) {
+            log.debug("Updating profile image for user ID: {}", userid);
+            userExist.setProfileImage(user.getProfileImage());
         }
         
-        User updatedUser = userRepository.save(user);
-        log.info("Profile updated successfully for user ID: {}", userId);
+        User updatedUser = userRepository.save(userExist);
+        log.info("Profile updated successfully for user ID: {}", userid);
         return updatedUser;
     }
 
@@ -185,15 +134,7 @@ public class UserServiceImpl implements UserService {
                     log.error("User not found with ID: {}", userId);
                     return new RuntimeException("User not found with id: " + userId);
                 });
-        
-        // Verify current password
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            log.warn("Password change failed for user ID: {} - Current password doesn't match", userId);
-            return false;
-        }
-        
-        // Update password
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(newPassword);
         userRepository.save(user);
         
         log.info("Password changed successfully for user ID: {}", userId);

@@ -2,7 +2,7 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.Like;
 import com.skillconnect.server.service.LikeService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,10 +11,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/likes")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class LikeController {
 
     private final LikeService likeService;
+
+    @Autowired
+    public LikeController(LikeService likeService) {
+        this.likeService = likeService;
+    }
 
     @PostMapping("/{postId}/user/{userId}")
     public ResponseEntity<Like> likePost(@PathVariable int postId, @PathVariable int userId) {

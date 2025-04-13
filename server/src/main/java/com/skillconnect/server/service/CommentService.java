@@ -14,7 +14,7 @@ public interface CommentService {
     
     List<Comment> findCommentsByPostId(int postId);
     
-    List<Comment> findCommentsByUserId(User user);
+    List<Comment> findCommentsByUserId(int id);
     
     Comment updateComment(Comment comment);
     

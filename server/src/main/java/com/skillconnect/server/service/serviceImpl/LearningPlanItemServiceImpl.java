@@ -95,7 +95,7 @@ public class LearningPlanItemServiceImpl implements LearningPlanItemService {
                     return new RuntimeException("Learning plan item not found with id: " + itemId);
                 });
         
-        item.setStatus("complete");
+        item.setComplete(true);
         item.setCompletionDate(LocalDate.now());
         item.setUpdatedAt(LocalDateTime.now());
         

@@ -2,7 +2,7 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.AdminMessage;
 import com.skillconnect.server.service.AdminMessageService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,10 +11,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin-messages")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class AdminMessageController {
 
     private final AdminMessageService adminMessageService;
+
+    @Autowired
+    public AdminMessageController(AdminMessageService adminMessageService) {
+        this.adminMessageService = adminMessageService;
+    }
 
     @PostMapping
     public ResponseEntity<AdminMessage> createMessage(@RequestBody AdminMessage message) {
@@ -24,10 +28,7 @@ public class AdminMessageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AdminMessage> getMessageById(@PathVariable int id) {
-        AdminMessage message = new AdminMessage();
-        message.setMessageId(id);
-
-        return adminMessageService.findById(message)
+        return adminMessageService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -39,10 +40,8 @@ public class AdminMessageController {
 
     @GetMapping("/admin/{adminId}")
     public ResponseEntity<List<AdminMessage>> getMessagesByAdminId(@PathVariable int adminId) {
-        AdminMessage admin = new AdminMessage();
-        admin.getAdmin().setUserId(adminId);
 
-        return ResponseEntity.ok(adminMessageService.findMessagesByAdminId(admin));
+        return ResponseEntity.ok(adminMessageService.findMessagesByAdminId(adminId));
     }
 
     @PutMapping

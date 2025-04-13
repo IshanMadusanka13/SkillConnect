@@ -3,7 +3,7 @@ package com.skillconnect.server.controller;
 import com.skillconnect.server.model.Comment;
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.service.CommentService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class CommentController {
 
     private final CommentService commentService;
+
+    @Autowired
+    public CommentController(CommentService commentService) {
+        this.commentService = commentService;
+    }
 
     @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
@@ -37,9 +41,7 @@ public class CommentController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Comment>> getCommentsByUserId(@PathVariable int userId) {
-        User user = new User();
-        user.setUserId(userId);
-        return ResponseEntity.ok(commentService.findCommentsByUserId(user));
+        return ResponseEntity.ok(commentService.findCommentsByUserId(userId));
     }
 
     @PutMapping

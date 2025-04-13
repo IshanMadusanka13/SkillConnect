@@ -76,10 +76,10 @@ public class CommentServiceImpl implements CommentService {
     }
     
     @Override
-    public List<Comment> findCommentsByUserId(User user) {
-        log.debug("Finding comments by user ID: {}", user.getUserId());
-        List<Comment> comments = commentRepository.findByUser_UserId(user.getUserId());
-        log.debug("Found {} comments by user ID: {}", comments.size(), user.getUserId());
+    public List<Comment> findCommentsByUserId(int id) {
+        log.debug("Finding comments by user ID: {}", id);
+        List<Comment> comments = commentRepository.findByUser_UserId(id);
+        log.debug("Found {} comments by user ID: {}", comments.size(), id);
         return comments;
     }
     

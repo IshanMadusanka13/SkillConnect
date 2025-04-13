@@ -21,14 +21,14 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    
+
     @Autowired
     public PostServiceImpl(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         log.info("PostServiceImpl initialized");
     }
-    
+
     @Override
     public Post createPost(Post post) {
         log.info("Creating new post for user ID: {}", post.getUser().getUserId());
@@ -37,21 +37,21 @@ public class PostServiceImpl implements PostService {
                     log.error("User not found with ID: {}", post.getUser().getUserId());
                     return new RuntimeException("User not found with id: " + post.getUser().getUserId());
                 });
-        
+
         post.setUser(user);
-        post.setCreatedAt(LocalDateTime.now());
-        
+
         Post savedPost = postRepository.save(post);
+
         log.info("Post created successfully with ID: {}", savedPost.getPostId());
         return savedPost;
     }
-    
+
     @Override
     public Optional<Post> findById(int postId) {
         log.debug("Finding post by ID: {}", postId);
         return postRepository.findById(postId);
     }
-    
+
     @Override
     public List<Post> findPostsByUserId(int userId) {
         log.debug("Finding posts for user ID: {}", userId);
@@ -59,7 +59,7 @@ public class PostServiceImpl implements PostService {
         log.debug("Found {} posts for user ID: {}", posts.size(), userId);
         return posts;
     }
-    
+
     @Override
     public List<Post> findAllPosts() {
         log.debug("Retrieving all posts");
@@ -67,7 +67,7 @@ public class PostServiceImpl implements PostService {
         log.debug("Found {} posts", posts.size());
         return posts;
     }
-    
+
     @Override
     public Post updatePost(Post post) {
         log.info("Updating post with ID: {}", post.getPostId());
@@ -79,7 +79,7 @@ public class PostServiceImpl implements PostService {
         log.info("Post updated successfully: {}", post.getPostId());
         return updatedPost;
     }
-    
+
     @Override
     public void deletePost(int postId) {
         log.info("Deleting post with ID: {}", postId);

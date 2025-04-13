@@ -3,7 +3,7 @@ package com.skillconnect.server.controller;
 import com.skillconnect.server.model.LearningPlan;
 import com.skillconnect.server.model.LearningPlanItem;
 import com.skillconnect.server.service.LearningPlanService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/learning-plans")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class LearningPlanController {
 
     private final LearningPlanService learningPlanService;
+
+    @Autowired
+    public LearningPlanController(LearningPlanService learningPlanService) {
+        this.learningPlanService = learningPlanService;
+    }
 
     @PostMapping
     public ResponseEntity<LearningPlan> createLearningPlan(@RequestBody LearningPlan learningPlan) {

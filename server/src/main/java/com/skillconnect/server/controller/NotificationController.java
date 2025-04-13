@@ -2,7 +2,7 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.Notification;
 import com.skillconnect.server.service.NotificationService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,10 +11,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/notifications")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class NotificationController {
 
     private final NotificationService notificationService;
+
+    @Autowired
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     @PostMapping
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {

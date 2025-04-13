@@ -46,7 +46,6 @@ public class LearningPlanServiceImpl implements LearningPlanService {
                 });
         
         learningPlan.setUser(user);
-        // Note: The @PrePersist will handle setting createdAt and updatedAt
         
         LearningPlan savedPlan = learningPlanRepository.save(learningPlan);
         log.info("Learning plan created successfully with ID: {}", savedPlan.getUser().getUserId());
@@ -98,7 +97,6 @@ public class LearningPlanServiceImpl implements LearningPlanService {
                 });
         
         item.setLearningPlan(plan);
-        // Note: The @PrePersist will handle setting createdAt and updatedAt
         
         LearningPlanItem savedItem = learningPlanItemRepository.save(item);
         log.info("Item added successfully to plan with ID: {}", planId);

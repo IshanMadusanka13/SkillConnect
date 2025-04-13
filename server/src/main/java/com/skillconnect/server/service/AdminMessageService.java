@@ -9,11 +9,11 @@ public interface AdminMessageService {
     
     AdminMessage createMessage(AdminMessage message);
     
-    Optional<AdminMessage> findById(AdminMessage message);
+    Optional<AdminMessage> findById(int id);
     
     List<AdminMessage> findAllMessages();
     
-    List<AdminMessage> findMessagesByAdminId(AdminMessage message);
+    List<AdminMessage> findMessagesByAdminId(int id);
     
     AdminMessage updateMessage(AdminMessage adminMessage);
     

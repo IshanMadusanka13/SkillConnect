@@ -2,7 +2,7 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.service.UserService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,10 +11,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class UserController {
 
     private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
@@ -38,11 +42,6 @@ public class UserController {
         return ResponseEntity.ok(userService.findAllUsers());
     }
 
-    @PutMapping
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(user));
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
@@ -59,24 +58,11 @@ public class UserController {
         return ResponseEntity.ok(userService.existsByUsername(username));
     }
 
-    @GetMapping("/{id}/followers")
-    public ResponseEntity<List<User>> getFollowers(@PathVariable int id) {
-        return ResponseEntity.ok(userService.getFollowers(id));
-    }
-
-    @GetMapping("/{id}/following")
-    public ResponseEntity<List<User>> getFollowing(@PathVariable int id) {
-        return ResponseEntity.ok(userService.getFollowing(id));
-    }
-
-    @PutMapping("/{id}/profile")
-    public ResponseEntity<User> updateProfile(
+    @PutMapping("/{id}/update")
+    public ResponseEntity<User> updateUser(
             @PathVariable int id,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam(required = false) String bio,
-            @RequestParam(required = false) String profileImage) {
-        return ResponseEntity.ok(userService.updateProfile(id, firstName, lastName, bio, profileImage));
+            @RequestBody User user) {
+        return ResponseEntity.ok(userService.updateUser(id,user));
     }
 
     @PutMapping("/{id}/change-password")

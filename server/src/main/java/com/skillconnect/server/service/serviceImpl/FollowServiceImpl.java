@@ -31,7 +31,7 @@ public class FollowServiceImpl implements FollowService {
     
     @Override
     public Follow followUser(Follow follow) {
-        log.info("Creating follow relationship: follower ID {} following user ID {}", follow.getFollower().getUserId(), follow.getFollowing().getUserId());
+        log.info("Creating follow relationship: follower ID {} following user ID {}", follow.getFollower().getUserId(), follow.getUser().getUserId());
         
         // Check if users exist
         User follower = userRepository.findById(follow.getFollower().getUserId())
@@ -40,22 +40,22 @@ public class FollowServiceImpl implements FollowService {
                     return new RuntimeException("Follower user not found with id: " + follow.getFollower().getUserId());
                 });
         
-        User followed = userRepository.findById(follow.getFollowing().getUserId())
+        User followed = userRepository.findById(follow.getUser().getUserId())
                 .orElseThrow(() -> {
-                    log.error("Followed user not found with ID: {}", follow.getFollowing().getUserId());
-                    return new RuntimeException("Followed user not found with id: " + follow.getFollowing().getUserId());
+                    log.error("Followed user not found with ID: {}", follow.getUser().getUserId());
+                    return new RuntimeException("Followed user not found with id: " + follow.getUser().getUserId());
                 });
         
         // Check if already following
-        if (isFollowing(follow.getFollower().getUserId(), follow.getFollowing().getUserId())) {
-            log.warn("User ID {} is already following user ID {}", follow.getFollower().getUserId(), follow.getFollowing().getUserId());
+        if (isFollowing(follow.getFollower().getUserId(), follow.getUser().getUserId())) {
+            log.warn("User ID {} is already following user ID {}", follow.getFollower().getUserId(), follow.getUser().getUserId());
             throw new RuntimeException("Already following this user");
         }
         
         // Create new follow relationship
         Follow newFollow = new Follow();
         newFollow.setFollower(follower);
-        newFollow.setFollowing(followed);
+        newFollow.setUser(followed);
         // The @PrePersist will handle setting createdAt
         
         Follow savedFollow = followRepository.save(newFollow);
@@ -65,12 +65,12 @@ public class FollowServiceImpl implements FollowService {
     
     @Override
     public void unfollowUser(Follow follow) {
-        log.info("Removing follow relationship: follower ID {} unfollowing user ID {}", follow.getFollower().getUserId(), follow.getFollowing().getUserId());
+        log.info("Removing follow relationship: follower ID {} unfollowing user ID {}", follow.getFollower().getUserId(), follow.getUser().getUserId());
         
-        Follow followExist = followRepository.findByFollower_UserIdAndFollowing_UserId(follow.getFollower().getUserId(), follow.getFollowing().getUserId())
+        Follow followExist = followRepository.findByFollower_UserIdAndUser_UserId(follow.getFollower().getUserId(), follow.getUser().getUserId())
                 .orElseThrow(() -> {
                     log.error("Follow relationship not found between follower ID {} and followed ID {}", 
-                    follow.getFollower().getUserId(), follow.getFollowing().getUserId());
+                    follow.getFollower().getUserId(), follow.getUser().getUserId());
                     return new RuntimeException("Follow relationship not found");
                 });
         
@@ -81,7 +81,7 @@ public class FollowServiceImpl implements FollowService {
     @Override
     public boolean isFollowing(int followerId, int followedId) {
         log.debug("Checking if user ID {} is following user ID {}", followerId, followedId);
-        Optional<Follow> follow = followRepository.findByFollower_UserIdAndFollowing_UserId(followerId, followedId);
+        Optional<Follow> follow = followRepository.findByFollower_UserIdAndUser_UserId(followerId, followedId);
         boolean following = follow.isPresent();
         log.debug("User ID {} is following user ID {}: {}", followerId, followedId, following);
         return following;
@@ -92,7 +92,7 @@ public class FollowServiceImpl implements FollowService {
         log.debug("Getting follower count for user ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        int count = followRepository.countByFollowing(user);
+        int count = followRepository.countByUser(user);
         log.debug("User ID {} has {} followers", userId, count);
         return count;
     }
