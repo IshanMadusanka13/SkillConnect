@@ -23,21 +23,6 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
-    @Column(name = "type", nullable = false, length = 50)
-    private String type;
-    
-    @ManyToOne
-    @JoinColumn(name = "from_user_id")
-    private User fromUser;
-    
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-    
-    @ManyToOne
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
-    
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
     
@@ -50,5 +35,10 @@ public class Notification {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    public Notification(User user, String content) {
+        this.user = user;
+        this.content = content;
     }
 }

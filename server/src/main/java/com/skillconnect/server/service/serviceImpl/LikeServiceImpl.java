@@ -1,12 +1,14 @@
 package com.skillconnect.server.service.serviceImpl;
 
 import com.skillconnect.server.model.Like;
+import com.skillconnect.server.model.Notification;
 import com.skillconnect.server.model.Post;
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.repository.LikeRepository;
 import com.skillconnect.server.repository.PostRepository;
 import com.skillconnect.server.repository.UserRepository;
 import com.skillconnect.server.service.LikeService;
+import com.skillconnect.server.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +26,17 @@ public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public LikeServiceImpl(
             LikeRepository likeRepository,
             PostRepository postRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, NotificationService notificationService) {
         this.likeRepository = likeRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
         log.info("LikeServiceImpl initialized");
     }
 
@@ -61,6 +65,8 @@ public class LikeServiceImpl implements LikeService {
             like.setUser(user);
             like.setPost(post);
             like.setCreatedAt(LocalDateTime.now());
+
+            notificationService.createNotification(new Notification(post.getUser(), user.getFirstName() +" " + user.getLastName() + " liked your post : " + post.getDescription()));
 
             Like savedLike = likeRepository.save(like);
             log.info("Like created successfully with ID: {}", savedLike.getLikeId());

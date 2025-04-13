@@ -71,8 +71,7 @@ public class LearningPlanItemServiceImpl implements LearningPlanItemService {
             log.error("Learning plan item not found with ID: {}", item.getItemId());
             throw new RuntimeException("Learning plan item not found with id: " + item.getItemId());
         }
-        
-        item.setUpdatedAt(LocalDateTime.now());
+
         LearningPlanItem updatedItem = learningPlanItemRepository.save(item);
         log.info("Learning plan item updated successfully: {}", item.getItemId());
         return updatedItem;
@@ -96,8 +95,6 @@ public class LearningPlanItemServiceImpl implements LearningPlanItemService {
                 });
         
         item.setComplete(true);
-        item.setCompletionDate(LocalDate.now());
-        item.setUpdatedAt(LocalDateTime.now());
         
         LearningPlanItem updatedItem = learningPlanItemRepository.save(item);
         log.info("Learning plan item marked as completed: {}", itemId);

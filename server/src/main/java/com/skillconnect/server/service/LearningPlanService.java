@@ -1,18 +1,18 @@
 package com.skillconnect.server.service;
 
+import com.skillconnect.server.dto.LearningPlanDTO;
 import com.skillconnect.server.model.LearningPlan;
 import com.skillconnect.server.model.LearningPlanItem;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface LearningPlanService {
     
-    LearningPlan createLearningPlan(LearningPlan learningPlan);
+    LearningPlan createLearningPlan(LearningPlanDTO dto);
     
-    Optional<LearningPlan> findById(int planId);
+    LearningPlanDTO findById(int planId);
     
-    List<LearningPlan> findLearningPlansByUserId(int userId);
+    List<LearningPlanDTO> findLearningPlansByUserId(int userId);
     
     LearningPlan updateLearningPlan(LearningPlan learningPlan);
     
@@ -21,4 +21,6 @@ public interface LearningPlanService {
     void removeItemFromPlan(int itemId);
 
     LearningPlanItem addItemToPlan(LearningPlanItem item, int planId);
+
+    double calculateStatus(List<LearningPlanItem> items);
 }

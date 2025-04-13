@@ -1,9 +1,9 @@
 package com.skillconnect.server.controller;
 
+import com.skillconnect.server.dto.LearningPlanDTO;
 import com.skillconnect.server.model.LearningPlan;
 import com.skillconnect.server.model.LearningPlanItem;
 import com.skillconnect.server.service.LearningPlanService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,20 +22,18 @@ public class LearningPlanController {
     }
 
     @PostMapping
-    public ResponseEntity<LearningPlan> createLearningPlan(@RequestBody LearningPlan learningPlan) {
-        LearningPlan created = learningPlanService.createLearningPlan(learningPlan);
+    public ResponseEntity<LearningPlan> createLearningPlan(@RequestBody LearningPlanDTO dto) {
+        LearningPlan created = learningPlanService.createLearningPlan(dto);
         return ResponseEntity.ok(created);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LearningPlan> getLearningPlanById(@PathVariable int id) {
-        return learningPlanService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<LearningPlanDTO> getLearningPlanById(@PathVariable int id) {
+        return ResponseEntity.ok(learningPlanService.findById(id));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<LearningPlan>> getLearningPlansByUserId(@PathVariable int userId) {
+    public ResponseEntity<List<LearningPlanDTO>> getLearningPlansByUserId(@PathVariable int userId) {
         return ResponseEntity.ok(learningPlanService.findLearningPlansByUserId(userId));
     }
 

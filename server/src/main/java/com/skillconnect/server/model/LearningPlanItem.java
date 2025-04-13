@@ -27,32 +27,7 @@ public class LearningPlanItem {
     @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
-    @Column(name = "order_index", nullable = false)
-    private Integer orderIndex;
-
     @Column(name = "is_complete", nullable = false)
     private boolean isComplete = false;
 
-    @Column(name = "completion_date")
-    private LocalDate completionDate;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

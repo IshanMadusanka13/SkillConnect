@@ -34,9 +34,6 @@ public class LearningPlan {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "status", nullable = false, length = 20)
-    private String status = "active";
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -46,10 +43,6 @@ public class LearningPlan {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "learning_plan_id")
-    private List<LearningPlanItem> items = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

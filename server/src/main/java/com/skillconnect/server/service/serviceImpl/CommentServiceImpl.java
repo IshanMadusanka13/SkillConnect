@@ -1,12 +1,14 @@
 package com.skillconnect.server.service.serviceImpl;
 
 import com.skillconnect.server.model.Comment;
+import com.skillconnect.server.model.Notification;
 import com.skillconnect.server.model.Post;
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.repository.CommentRepository;
 import com.skillconnect.server.repository.PostRepository;
 import com.skillconnect.server.repository.UserRepository;
 import com.skillconnect.server.service.CommentService;
+import com.skillconnect.server.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +26,17 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     
     @Autowired
     public CommentServiceImpl(
             CommentRepository commentRepository,
             PostRepository postRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, NotificationService notificationService) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
         log.info("CommentServiceImpl initialized");
     }
     
@@ -46,7 +50,7 @@ public class CommentServiceImpl implements CommentService {
                     return new RuntimeException("Post not found with id: " + comment.getPost().getPostId());
                 });
         
-        User user = userRepository.findById(comment.getPost().getPostId())
+        User user = userRepository.findById(comment.getUser().getUserId())
                 .orElseThrow(() -> {
                     log.error("User not found with ID: {}", comment.getUser().getUserId());
                     return new RuntimeException("User not found with id: " + comment.getUser().getUserId());
@@ -54,7 +58,8 @@ public class CommentServiceImpl implements CommentService {
         
         comment.setPost(post);
         comment.setUser(user);
-        // Note: The @PrePersist will handle setting createdAt and updatedAt
+
+        notificationService.createNotification(new Notification(post.getUser(), user.getFirstName() + " " + user.getLastName() + " commented on your post : " + post.getDescription()));
         
         Comment savedComment = commentRepository.save(comment);
         log.info("Comment created successfully with ID: {}", savedComment.getCommentId());
