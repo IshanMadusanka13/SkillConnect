@@ -2,7 +2,6 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +35,11 @@ public class UserController {
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.findByEmail(email));
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestBody User user) {
+        return ResponseEntity.ok(userService.login(user));
+    }    
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {

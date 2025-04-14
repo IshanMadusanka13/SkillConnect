@@ -21,6 +21,8 @@ const fetchApi = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
     
+console.log('API Response:', response);
+
     // Handle 401 Unauthorized
     if (response.status === 401) {
       localStorage.removeItem('token');

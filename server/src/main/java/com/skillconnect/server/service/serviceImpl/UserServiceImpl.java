@@ -140,4 +140,17 @@ public class UserServiceImpl implements UserService {
         log.info("Password changed successfully for user ID: {}", userId);
         return true;
     }
+
+    @Override
+    public User login(User userDetails) {
+        log.info("Attempting to login with username: {}", userDetails.getUsername());
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        if (user != null && user.getPassword().equals(userDetails.getPassword())) {
+            log.info("Login successful for user: {}", userDetails.getUsername());
+            return user;
+        } else {
+            log.warn("Login failed for user: {}", userDetails.getUsername());
+            return null;
+        }
+    }
 }
