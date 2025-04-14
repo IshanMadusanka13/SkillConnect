@@ -1,4 +1,4 @@
-const API_URL = 'https://api.example.com'; // Replace with your actual API URL
+const API_URL = 'http://localhost:8080/api'; // Replace with your actual API URL
 
 // Helper function for making API requests
 const fetchApi = async (endpoint, options = {}) => {
@@ -51,7 +51,7 @@ export const api = {
     }),
   
   register: (userData) => 
-    fetchApi('/auth/register', { 
+    fetchApi('/users', { 
       method: 'POST', 
       body: JSON.stringify(userData) 
     }),

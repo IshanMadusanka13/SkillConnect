@@ -1,6 +1,6 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '../src/contexts/AuthContext';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from '../src/hooks/useAuth';
 import { ThemeProvider } from '../src/contexts/ThemeContext';
 
 // Pages
@@ -18,6 +18,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
+      
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
+       
       </AuthProvider>
     </ThemeProvider>
   );
