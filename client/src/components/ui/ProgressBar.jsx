@@ -1,11 +1,28 @@
 import React from 'react';
 
 const ProgressBar = ({ progress }) => {
+  // Ensure progress is between 0 and 100
+  const safeProgress = Math.min(Math.max(0, progress), 100);
+  
+  // Determine color based on progress
+  let colorClass = 'bg-blue-500';
+  if (safeProgress >= 100) {
+    colorClass = 'bg-green-500';
+  } else if (safeProgress >= 75) {
+    colorClass = 'bg-blue-500';
+  } else if (safeProgress >= 50) {
+    colorClass = 'bg-yellow-500';
+  } else if (safeProgress >= 25) {
+    colorClass = 'bg-orange-500';
+  } else {
+    colorClass = 'bg-red-500';
+  }
+  
   return (
-    <div className="w-32 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+    <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
       <div 
-        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
-        style={{ width: `${progress}%` }}
+        className={`h-2.5 rounded-full ${colorClass}`} 
+        style={{ width: `${safeProgress}%` }}
       ></div>
     </div>
   );

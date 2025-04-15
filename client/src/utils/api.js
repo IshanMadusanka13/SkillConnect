@@ -9,6 +9,7 @@ const fetchApi = async (endpoint, options = {}) => {
 
   // Add auth token if available
   const token = localStorage.getItem('token');
+  console.log('Token:', token);
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -165,6 +166,11 @@ export const api = {
     fetchApi(`/posts/${postId}/unlike`, { 
       method: 'POST' 
     }),
+
+  // Add this to the api object in api.js
+  loadFeed: (userId) => 
+    fetchApi(`/posts/loadfeed/${userId}`),
+
   
   // Comments
   getComments: (postId) => 
@@ -207,23 +213,55 @@ export const api = {
     }),
   
   // Learning Plans
-  getLearningPlans: () => 
-    fetchApi('/learning-plans'),
-  
+  getLearningPlans: (userId) => 
+    fetchApi(`/learning-plans/user/${userId}`),
+
   getLearningPlanById: (planId) => 
     fetchApi(`/learning-plans/${planId}`),
-  
+
   createLearningPlan: (planData) => 
     fetchApi('/learning-plans', { 
       method: 'POST', 
       body: JSON.stringify(planData) 
     }),
-  
+
   updateLearningPlan: (planId, planData) => 
-    fetchApi(`/learning-plans/${planId}`, { 
+    fetchApi(`/learning-plans`, { 
       method: 'PUT', 
       body: JSON.stringify(planData) 
     }),
+
+  deleteLearningPlan: (planId) => 
+    fetchApi(`/learning-plans/${planId}`, { 
+      method: 'DELETE' 
+    }),
+
+  // Learning Plan Items
+  getLearningPlanItems: (planId) => 
+    fetchApi(`/learning-plan-items/plan/${planId}`),
+
+  createLearningPlanItem: (itemData) => 
+    fetchApi('/learning-plan-items', { 
+      method: 'POST', 
+      body: JSON.stringify(itemData) 
+    }),
+
+  updateLearningPlanItem: (itemData) => 
+    fetchApi('/learning-plan-items', { 
+      method: 'PUT', 
+      body: JSON.stringify(itemData) 
+    }),
+
+  deleteLearningPlanItem: (itemId) => 
+    fetchApi(`/learning-plan-items/${itemId}`, { 
+      method: 'DELETE' 
+    }),
+
+  markItemAsCompleted: (itemId) => 
+    fetchApi(`/learning-plan-items/${itemId}/complete`, { 
+      method: 'PUT' 
+    }),
+
   
   // Progress
   getProgress: () => 
