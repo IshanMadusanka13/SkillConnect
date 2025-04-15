@@ -21,7 +21,7 @@ const fetchApi = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
     
-console.log('API Response:', response);
+    console.log('API Response:', response);
 
     // Handle 401 Unauthorized
     if (response.status === 401) {
@@ -30,13 +30,26 @@ console.log('API Response:', response);
       return null;
     }
     
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Something went wrong');
+    // Check if the response has content before trying to parse JSON
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      // Only try to parse JSON if there's content and it's JSON type
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+      
+      return data;
+    } else {
+      // Handle non-JSON responses
+      if (!response.ok) {
+        throw new Error('Something went wrong');
+      }
+      
+      return { success: true };
     }
-    
-    return data;
   } catch (error) {
     console.error('API Error:', error);
     throw error;
@@ -47,13 +60,13 @@ console.log('API Response:', response);
 export const api = {
   // Auth
   login: (credentials) => 
-    fetchApi('/auth/login', { 
+    fetchApi('/users/login', { 
       method: 'POST', 
       body: JSON.stringify(credentials) 
     }),
   
   register: (userData) => 
-    fetchApi('/users', { 
+    fetchApi('/users/register', { 
       method: 'POST', 
       body: JSON.stringify(userData) 
     }),
@@ -64,17 +77,19 @@ export const api = {
     }),
   
   // Users
-  getCurrentUser: () => 
-    fetchApi('/users/me'),
+  getCurrentUser: (email) => 
+    fetchApi(`/users/email/${email}`),
   
   getUserProfile: (username) => 
     fetchApi(`/users/${username}`),
   
+ // Update this method in your api.js file
   updateUserProfile: (userData) => 
-    fetchApi('/users/me', { 
+    fetchApi(`/users/${userData.userId}/update`, { 
       method: 'PUT', 
       body: JSON.stringify(userData) 
     }),
+
   
   followUser: (userId) => 
     fetchApi(`/users/${userId}/follow`, { 
@@ -98,6 +113,11 @@ export const api = {
       method: 'POST', 
       body: JSON.stringify(postData) 
     }),
+
+  // Add this method to your api.js file
+  getUserPosts: (userId) => 
+    fetchApi(`/posts/user/${userId}`),
+
   
   updatePost: (postId, postData) => 
     fetchApi(`/posts/${postId}`, { 

@@ -45,21 +45,27 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setError(null);
+      
+      // Simulate login API call
       const response = await api.login(credentials);
-      
-      // Store the token
-      localStorage.setItem('token', response.token);
-      
-      // Fetch user data
-      const user = await api.getCurrentUser();
+  
+      // Hardcoded JWT token for testing
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiaWF0IjoxNzEyOTY3ODAwLCJleHAiOjE3MTI5NzE0MDB9.Kf4JOM_q7ZHJ9v8NFVJRYHyC7q-srMep2q0O8T9u15Q";
+  
+      // Store token in localStorage
+      localStorage.setItem('token', token);
+  
+      // Use email to fetch user
+      const user = await api.getCurrentUser(credentials.email);
       setCurrentUser(user);
-      
+  
       return { success: true };
     } catch (err) {
       setError(err.message || 'Login failed');
       return { success: false, error: err.message };
     }
   };
+  
 
   const logout = () => {
     localStorage.removeItem('token');

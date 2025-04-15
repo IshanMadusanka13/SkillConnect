@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login, error } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -16,10 +21,29 @@ const Login = () => {
     }));
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempt with:', formData);
-    // Authentication logic would go here
+    setIsLoading(true);
+    setLoginError(null);
+    
+    try {
+      const { success, error } = await login({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      if (success) {
+        // Redirect to dashboard or home page after successful login
+        navigate('/home');
+      } else {
+        setLoginError(error || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      setLoginError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
