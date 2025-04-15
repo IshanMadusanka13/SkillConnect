@@ -1,6 +1,5 @@
 package com.skillconnect.server.security;
 
-import com.skillconnect.server.model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +23,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws IOException, ServletException {
+
+        logger.info("Request Came from"+request.getServletPath());
 
         String header = request.getHeader("Authorization");
 

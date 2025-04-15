@@ -1,6 +1,5 @@
 package com.skillconnect.server.security;
 
-import com.skillconnect.server.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,9 +1,9 @@
 package com.skillconnect.server.service.serviceImpl;
 
 import com.skillconnect.server.model.User;
-import com.skillconnect.server.repository.FollowRepository;
 import com.skillconnect.server.repository.UserRepository;
 import com.skillconnect.server.security.JwtTokenUtil;
+import com.skillconnect.server.service.OAuthService;
 import com.skillconnect.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,14 +21,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final FollowRepository followRepository;
     private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository,
-                           FollowRepository followRepository, JwtTokenUtil jwtTokenUtil) {
+    public UserServiceImpl(UserRepository userRepository, JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
-        this.followRepository = followRepository;
         this.jwtTokenUtil = jwtTokenUtil;
         log.info("UserServiceImpl initialized");
     }
@@ -102,27 +99,27 @@ public class UserServiceImpl implements UserService {
                     log.error("User not found with ID: {}", userid);
                     return new RuntimeException("User not found with id: " + userid);
                 });
-        
+
         if (user.getFirstName() != null) {
             log.debug("Updating first name for user ID: {}", userid);
             userExist.setFirstName(user.getFirstName());
         }
-        
+
         if (user.getLastName() != null) {
             log.debug("Updating last name for user ID: {}", userid);
             userExist.setLastName(user.getLastName());
         }
-        
+
         if (user.getBio() != null) {
             log.debug("Updating bio for user ID: {}", userid);
             userExist.setBio(user.getBio());
         }
-        
+
         if (user.getProfileImage() != null) {
             log.debug("Updating profile image for user ID: {}", userid);
             userExist.setProfileImage(user.getProfileImage());
         }
-        
+
         User updatedUser = userRepository.save(userExist);
         log.info("Profile updated successfully for user ID: {}", userid);
         return updatedUser;
@@ -138,7 +135,7 @@ public class UserServiceImpl implements UserService {
                 });
         user.setPassword(newPassword);
         userRepository.save(user);
-        
+
         log.info("Password changed successfully for user ID: {}", userId);
         return true;
     }
@@ -162,4 +159,16 @@ public class UserServiceImpl implements UserService {
             return null;
         }
     }
+
+    @Override
+    public String loginOAuth(String code) {
+        OAuthService oAuthService = new OAuthServiceImpl(userRepository);
+        User user = oAuthService.processGrantCode(code);
+
+        String token = jwtTokenUtil.generateToken(user.getEmail());
+
+        log.info("Login successful for user: {}", user.getEmail());
+        return token;
+    }
+
 }

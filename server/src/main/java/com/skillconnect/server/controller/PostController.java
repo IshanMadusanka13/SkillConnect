@@ -2,7 +2,6 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.Post;
 import com.skillconnect.server.service.PostService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

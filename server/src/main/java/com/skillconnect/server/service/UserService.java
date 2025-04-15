@@ -11,6 +11,7 @@ public interface UserService {
     
     User saveUser(User user);
     Map<String, Object> login(User user);
+    String loginOAuth(String code);
     Optional<User> findById(int userId);
     User findByEmail(String email);
     List<User> findAllUsers();
@@ -19,4 +20,5 @@ public interface UserService {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
     boolean changePassword(int userId, String currentPassword, String newPassword);
+
 }

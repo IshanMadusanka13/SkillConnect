@@ -1,7 +1,6 @@
 package com.skillconnect.server.service;
 
 import com.skillconnect.server.model.Comment;
-import com.skillconnect.server.model.User;
 
 import java.util.List;
 import java.util.Optional;

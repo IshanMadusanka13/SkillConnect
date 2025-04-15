@@ -1,0 +1,26 @@
+package com.skillconnect.server.service;
+
+import com.skillconnect.server.model.LearningUpdate;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface LearningUpdateService {
+    LearningUpdate saveLearningUpdate(LearningUpdate learningUpdate);
+
+    Optional<LearningUpdate> findById(int updateId);
+
+    List<LearningUpdate> findAllLearningUpdates();
+
+    List<LearningUpdate> findByUserId(int userId);
+
+    LearningUpdate updateLearningUpdate(LearningUpdate learningUpdate);
+
+    void deleteLearningUpdate(int updateId);
+
+    List<LearningUpdate> findByCategory(String category);
+
+    List<LearningUpdate> findByType(String type);
+
+    List<LearningUpdate> findByLevel(String level);
+}

@@ -2,7 +2,6 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.AdminMessage;
 import com.skillconnect.server.service.AdminMessageService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

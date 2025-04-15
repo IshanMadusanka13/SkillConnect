@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setPost(post);
         comment.setUser(user);
 
-        //notificationService.createNotification(new Notification(post.getUser(), user.getFirstName() + " " + user.getLastName() + " commented on your post : " + post.getDescription()));
+        notificationService.createNotification(new Notification(post.getUser(), user.getFirstName() + " " + user.getLastName() + " commented on your post : " + post.getDescription()));
         
         Comment savedComment = commentRepository.save(comment);
         log.info("Comment created successfully with ID: {}", savedComment.getCommentId());
