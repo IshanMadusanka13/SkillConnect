@@ -11,10 +11,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is logged in on mount
     const token = localStorage.getItem('token');
+    const email = localStorage.getItem('userEmail');
     if (token) {
-      api.getCurrentUser()
+      api.getCurrentUser(email)
         .then(user => {
           setCurrentUser(user);
+          
         })
         .catch(err => {
           console.error('Failed to fetch user:', err);
@@ -48,12 +50,8 @@ export const AuthProvider = ({ children }) => {
 
       // Simulate login API call
       const response = await api.login(credentials);
-      console.log('Login response:', response);
-      // Store token in localStorage
-      console.log('Token stored:');
-      console.log(response.token);
       localStorage.setItem('token', response.token);
-
+      localStorage.setItem('userEmail', credentials.email);
       // Use email to fetch user
       const user = await api.getCurrentUser(credentials.email);
       setCurrentUser(user);

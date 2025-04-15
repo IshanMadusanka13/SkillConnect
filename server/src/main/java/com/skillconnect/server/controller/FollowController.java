@@ -38,5 +38,14 @@ public class FollowController {
     public ResponseEntity<Integer> getFollowingCount(@PathVariable int userId) {
         return ResponseEntity.ok(followService.getFollowingCount(userId));
     }
+
+    @GetMapping("/check")
+    public ResponseEntity<Boolean> isFollowing(
+            @RequestParam int followerId,
+            @RequestParam int followingId) {
+        boolean following = followService.isFollowing(followerId, followingId);
+        return ResponseEntity.ok(following);
+    }
+
 }
 

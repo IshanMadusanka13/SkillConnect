@@ -22,8 +22,11 @@ const Profile = () => {
   const [editingPost, setEditingPost] = useState(null);
   const [editPostData, setEditPostData] = useState({ title: '', content: '' });
   const [showEditPostModal, setShowEditPostModal] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   
   // Initialize form data when currentUser changes
+  // Initialize form data and fetch user data when currentUser changes
   useEffect(() => {
     if (currentUser) {
       setFormData({
@@ -35,8 +38,23 @@ const Profile = () => {
       
       // Fetch user posts when user data is available
       fetchUserPosts();
+      
+      // Fetch follower and following counts
+      const fetchFollowCounts = async () => {
+        try {
+          const followers = await api.getFollowerCount(currentUser.userId);
+          const following = await api.getFollowingCount(currentUser.userId);
+          setFollowerCount(followers);
+          setFollowingCount(following);
+        } catch (error) {
+          console.error('Error fetching follow counts:', error);
+        }
+      };
+      
+      fetchFollowCounts();
     }
   }, [currentUser]);
+
 
   const handlePostUpdate = async (postId) => {
     // Refresh the posts to get the updated data
@@ -305,13 +323,13 @@ const Profile = () => {
           <div className="mt-6 flex space-x-4">
             <div className="text-center">
               <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                {currentUser.followers || 0}
+                {followerCount}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400">Followers</span>
             </div>
             <div className="text-center">
               <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                {currentUser.following || 0}
+                {followingCount}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400">Following</span>
             </div>
@@ -375,7 +393,7 @@ const Profile = () => {
                 <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
               </div>
   
-              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
   
               <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div className="absolute top-0 right-0 pt-4 pr-4">

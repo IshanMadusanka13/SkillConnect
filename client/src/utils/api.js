@@ -20,8 +20,8 @@ const fetchApi = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
-    console.log('API Request:', { endpoint, options });
-    console.log('API Response:', response);
+    // console.log('API Request:', { endpoint, options });
+    // console.log('API Response:', response);
 
     // Handle 401 Unauthorized
     if (response.status === 401) {
@@ -90,16 +90,42 @@ export const api = {
       body: JSON.stringify(userData) 
     }),
 
+  searchUsers: (query) => 
+    fetchApi(`/users/search?query=${encodeURIComponent(query)}`),
+
+  // Add this to the api object in api.js
+  getUserById: (userId) => 
+    fetchApi(`/users/${userId}`),
+
+
   
-  followUser: (userId) => 
-    fetchApi(`/users/${userId}/follow`, { 
-      method: 'POST' 
+  // Followers/Following
+  getFollowerCount: (userId) =>
+    fetchApi(`/follow/${userId}/followers/count`),
+  
+  getFollowingCount: (userId) =>
+    fetchApi(`/follow/${userId}/following/count`),
+  
+  followUser: (followerId, userId) =>
+    fetchApi(`/follow`, {
+      method: 'POST',
+      body: JSON.stringify({
+        follower: { userId: followerId },
+        user: { userId: userId }
+      })
     }),
   
-  unfollowUser: (userId) => 
-    fetchApi(`/users/${userId}/unfollow`, { 
-      method: 'POST' 
+  unfollowUser: (followerId, userId) =>
+    fetchApi(`/follow`, {
+      method: 'DELETE',
+      body: JSON.stringify({
+        follower: { userId: followerId },
+        user: { userId: userId }
+      })
     }),
+  
+  isFollowing: (followerId, userId) =>
+    fetchApi(`/follow/check?followerId=${followerId}&followingId=${userId}`),
   
   // Posts
   getPosts: (page = 1, limit = 10) => 

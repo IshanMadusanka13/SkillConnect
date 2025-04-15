@@ -171,4 +171,13 @@ public class UserServiceImpl implements UserService {
         return token;
     }
 
+    @Override
+    public List<User> searchUsers(String query) {
+        log.debug("Searching users with query: {}", query);
+        List<User> users = userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query);
+        log.debug("Found {} users matching query: {}", users.size(), query);
+        return users;
+    }
+
+
 }

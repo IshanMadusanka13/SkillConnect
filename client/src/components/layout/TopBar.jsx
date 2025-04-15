@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { SearchIcon, MenuIcon, BellIcon, PlusIcon, SunIcon, MoonIcon, XIcon } from '@heroicons/react/outline';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../utils/api';
@@ -16,6 +16,12 @@ const TopBar = () => {
   const [postTitle, setPostTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   // Default avatar if no user or no profile image
   const defaultAvatar = "/assets/images/default-avatar.png";
@@ -51,6 +57,50 @@ const TopBar = () => {
     }
   };
 
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle search input change
+  const handleSearchChange = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.trim().length >= 2) {
+      setIsSearching(true);
+      setShowSearchResults(true);
+      
+      try {
+        const results = await api.searchUsers(query);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Error searching users:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  // Navigate to user profile
+  const navigateToProfile = (userId) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    navigate(`/user/${userId}`);
+  };
+
   return (
     <>
       <header className="bg-white dark:bg-slate-800 shadow-sm z-10">
@@ -74,17 +124,65 @@ const TopBar = () => {
                 </div>
               )}
               
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <div className="hidden sm:ml-6 sm:flex sm:items-center relative" ref={searchRef}>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <SearchIcon className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white"
-                    placeholder="Search for skills, topics, users..."
+                    placeholder="Search for users..."
                     type="search"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
                   />
                 </div>
+                
+                {/* Search Results Dropdown */}
+                {showSearchResults && (
+                  <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                    {isSearching ? (
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-2">Searching...</p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <ul>
+                        {searchResults.map(user => (
+                          <li 
+                            key={user.userId} 
+                            className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer"
+                            onClick={() => navigateToProfile(user.userId)}
+                          >
+                            <div className="flex items-center">
+                              <img 
+                                src={user.profileImage || "/assets/images/default-avatar.png"} 
+                                alt={`${user.firstName} ${user.lastName}`}
+                                className="h-10 w-10 rounded-full mr-3 object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "/assets/images/default-avatar.png";
+                                }}
+                              />
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                  {user.firstName} {user.lastName}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  @{user.username}
+                                </p>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : searchQuery.trim().length >= 2 ? (
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        No users found matching "{searchQuery}"
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
             
@@ -152,7 +250,7 @@ const TopBar = () => {
               <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
             </div>
 
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
 
             <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <div className="absolute top-0 right-0 pt-4 pr-4">

@@ -13,6 +13,7 @@ import LearningPlan from '../src/pages/LearningPlan';
 import Progress from '../src/pages/Progress';
 import Notifications from '../src/pages/Notifications';
 import Admin from '../src/pages/Admin';
+import UserProfile from './pages/UserProfile';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/progress" element={<Progress />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
         </Routes>
        
       </AuthProvider>

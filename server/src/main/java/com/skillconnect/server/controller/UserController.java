@@ -98,5 +98,13 @@ public class UserController {
             response.sendRedirect("http://localhost:5197/oauth2/error");
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<User>> searchUsers(@RequestParam String query) {
+    log.info("Searching users with query: {}", query);
+    List<User> users = userService.searchUsers(query);
+    return ResponseEntity.ok(users);
+}
+
 }
 

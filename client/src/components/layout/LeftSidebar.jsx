@@ -6,7 +6,7 @@ const LeftSidebar = () => {
   const location = useLocation();
   
   const navItems = [
-    { name: 'Home', path: '/', icon: HomeIcon },
+    { name: 'Home', path: '/home', icon: HomeIcon },
     { name: 'Learning Plan', path: '/plan', icon: BookOpenIcon },
     { name: 'Discover', path: '/discover', icon: SparklesIcon },
     { name: 'Progress', path: '/progress', icon: ChartBarIcon },
