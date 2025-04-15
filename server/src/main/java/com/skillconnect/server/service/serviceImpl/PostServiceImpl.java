@@ -1,15 +1,18 @@
 package com.skillconnect.server.service.serviceImpl;
 
+import com.skillconnect.server.model.Follow;
 import com.skillconnect.server.model.Post;
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.repository.PostRepository;
 import com.skillconnect.server.repository.UserRepository;
+import com.skillconnect.server.service.FollowService;
 import com.skillconnect.server.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,11 +23,13 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final FollowService followService;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository) {
+    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, FollowService followService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.followService = followService;
         log.info("PostServiceImpl initialized");
     }
 
@@ -84,5 +89,20 @@ public class PostServiceImpl implements PostService {
         log.info("Deleting post with ID: {}", postId);
         postRepository.deleteById(postId);
         log.info("Post deleted successfully: {}", postId);
+    }
+
+    @Override
+    public List<Post> loadFeed(int userId) {
+        log.info("Loading feed for user ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Follow> followers = followService.getFollowers(userId);
+        List<Post> posts = postRepository.findByUser_UserId(userId);
+        followers.forEach(follower -> {
+            posts.addAll(postRepository.findByUser_UserId(follower.getFollower().getUserId()));
+        });
+        Collections.shuffle(posts);
+        log.info("Loaded feed for user ID: {}", userId);
+        return posts;
     }
 }

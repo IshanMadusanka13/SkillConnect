@@ -18,4 +18,6 @@ public interface PostService {
     Post updatePost(Post post);
     
     void deletePost(int postId);
+
+    List<Post> loadFeed(int userId);
 }

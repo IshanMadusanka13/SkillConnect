@@ -56,5 +56,11 @@ public class PostController {
         postService.deletePost(postId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/loadfeed/{userId}")
+    public ResponseEntity<List<Post>> loadFeed(@PathVariable int userId) {
+        List<Post> posts = postService.loadFeed(userId);
+        return ResponseEntity.ok(posts);
+    }
 }
 
