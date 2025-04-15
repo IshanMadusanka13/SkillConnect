@@ -3,13 +3,14 @@ package com.skillconnect.server.service;
 import com.skillconnect.server.model.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
 public interface UserService {
     
     User saveUser(User user);
-    User login(User user);
+    Map<String, Object> login(User user);
     Optional<User> findById(int userId);
     User findByEmail(String email);
     List<User> findAllUsers();

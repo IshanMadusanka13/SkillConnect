@@ -2,11 +2,14 @@ package com.skillconnect.server.controller;
 
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.service.UserService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,9 +40,14 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
-        return ResponseEntity.ok(userService.login(user));
-    }    
+    public ResponseEntity<?> login(@RequestBody User user) {
+        Map<String, Object> response = userService.login(user);
+        if (response != null) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -66,7 +74,7 @@ public class UserController {
     public ResponseEntity<User> updateUser(
             @PathVariable int id,
             @RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(id,user));
+        return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
     @PutMapping("/{id}/change-password")

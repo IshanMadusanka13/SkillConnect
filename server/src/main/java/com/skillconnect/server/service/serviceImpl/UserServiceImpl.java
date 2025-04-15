@@ -1,19 +1,19 @@
 package com.skillconnect.server.service.serviceImpl;
 
-import com.skillconnect.server.model.Follow;
 import com.skillconnect.server.model.User;
 import com.skillconnect.server.repository.FollowRepository;
 import com.skillconnect.server.repository.UserRepository;
+import com.skillconnect.server.security.JwtTokenUtil;
 import com.skillconnect.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -22,12 +22,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, 
-                          FollowRepository followRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           FollowRepository followRepository, JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
         this.followRepository = followRepository;
+        this.jwtTokenUtil = jwtTokenUtil;
         log.info("UserServiceImpl initialized");
     }
 
@@ -142,14 +144,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User login(User userDetails) {
-        log.info("Attempting to login with username: {}", userDetails.getUsername());
-        User user = userRepository.findByUsername(userDetails.getUsername());
+    public Map<String, Object> login(User userDetails) {
+        log.info("Attempting to login with username: {}", userDetails.getEmail());
+        User user = userRepository.findByEmail(userDetails.getEmail());
         if (user != null && user.getPassword().equals(userDetails.getPassword())) {
-            log.info("Login successful for user: {}", userDetails.getUsername());
-            return user;
+
+            String token = jwtTokenUtil.generateToken(user.getEmail());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("user", user);
+
+            log.info("Login successful for user: {}", userDetails.getEmail());
+            return response;
         } else {
-            log.warn("Login failed for user: {}", userDetails.getUsername());
+            log.warn("Login failed for user: {}", userDetails.getEmail());
             return null;
         }
     }
