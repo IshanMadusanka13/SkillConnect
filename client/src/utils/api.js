@@ -142,12 +142,42 @@ export const api = {
   
   // Comments
   getComments: (postId) => 
-    fetchApi(`/posts/${postId}/comments`),
-  
-  createComment: (postId, content) => 
-    fetchApi(`/posts/${postId}/comments`, { 
+    fetchApi(`/comments/post/${postId}`),
+
+  createComment: (commentData) => 
+    fetchApi('/comments', { 
       method: 'POST', 
-      body: JSON.stringify({ content }) 
+      body: JSON.stringify({
+        content: commentData.content,
+        user: { userId: commentData.user.userId },
+        post: { postId: commentData.post.postId }
+      }) 
+    }),
+  
+
+  updateComment: (commentData) => 
+    fetchApi('/comments', { 
+      method: 'PUT', 
+      body: JSON.stringify(commentData) 
+    }),
+
+  deleteComment: (commentId) => 
+    fetchApi(`/comments/${commentId}`, { 
+      method: 'DELETE' 
+    }),
+
+  // Likes
+  getLikes: (postId) => 
+    fetchApi(`/likes/${postId}`),
+
+  likePost: (postId, userId) => 
+    fetchApi(`/likes/${postId}/user/${userId}`, { 
+      method: 'POST' 
+    }),
+
+  unlikePost: (postId, userId) => 
+    fetchApi(`/likes/${postId}/user/${userId}`, { 
+      method: 'DELETE' 
     }),
   
   // Learning Plans
