@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.List;
 import java.util.Optional;
 
 @Log4j2
@@ -110,6 +111,16 @@ public class FollowServiceImpl implements FollowService {
         int count = followRepository.countByFollower(user);
         log.debug("User ID {} is following {} users", userId, count);
         return count;
+    }
+
+    @Override
+    public List<Follow> getFollowers(int userId) {
+        log.debug("Getting followers for user ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Follow> followers = followRepository.findByUser_UserId(userId);
+        log.debug("User ID {} has {} followers", userId, followers.size());
+        return followers;
     }
 
 }
