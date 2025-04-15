@@ -37,6 +37,11 @@ const Profile = () => {
       fetchUserPosts();
     }
   }, [currentUser]);
+
+  const handlePostUpdate = async (postId) => {
+    // Refresh the posts to get the updated data
+    await fetchUserPosts();
+  };
   
   // Fetch user posts
   const fetchUserPosts = async () => {
@@ -338,7 +343,7 @@ const Profile = () => {
             <div className="space-y-6">
               {userPosts.map(post => (
                 <div key={post.postId} className="relative">
-                  <PostCard post={post} />
+                  <PostCard post={post} onPostUpdate={handlePostUpdate} />
                   
                   {/* Post actions */}
                   <div className="absolute top-4 right-4 flex space-x-2">
@@ -351,13 +356,12 @@ const Profile = () => {
                     <button 
                       onClick={() => handleDeletePost(post.postId)}
                       className="p-1.5 bg-white dark:bg-slate-700 rounded-full shadow-sm hover:bg-gray-100 dark:hover:bg-slate-600"
-                      >
-                        <TrashIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      </button>
-                    </div>
+                    >
+                      <TrashIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    </button>
                   </div>
-                ))}
-  
+                </div>
+              ))}
               </div>
             )}
           </div>
