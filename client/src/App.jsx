@@ -15,6 +15,7 @@ import Notifications from '../src/pages/Notifications';
 import Admin from '../src/pages/Admin';
 import UserProfile from './pages/UserProfile';
 import OauthRedirect from './utils/OauthRedirect.jsx';
+import Announcements from './pages/Announcements';
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/admin" element={<Admin />} />
           <Route path="/user/:userId" element={<UserProfile />} />
           <Route path="/oauth2/success" element={<OauthRedirect />} />
+          <Route path="/announcements" element={<Announcements />} />
         </Routes>
        
       </AuthProvider>

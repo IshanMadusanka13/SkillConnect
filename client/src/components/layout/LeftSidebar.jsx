@@ -11,6 +11,7 @@ const LeftSidebar = () => {
     { name: 'Discover', path: '/discover', icon: SparklesIcon },
     { name: 'Progress', path: '/progress', icon: ChartBarIcon },
     { name: 'Notifications', path: '/notifications', icon: BellIcon },
+    { name: 'Announcements', path: '/announcements', icon: BellIcon ,}
   ];
   
   return (

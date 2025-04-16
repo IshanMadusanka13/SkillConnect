@@ -321,21 +321,35 @@ export const api = {
       method: 'PUT' 
     }),
   
-  // Admin
-  getUsers: (page = 1, limit = 10) => 
-    fetchApi(`/admin/users?page=${page}&limit=${limit}`),
-  
-  updateUserRole: (userId, role) => 
-    fetchApi(`/admin/users/${userId}/role`, { 
-      method: 'PUT', 
-      body: JSON.stringify({ role }) 
-    }),
-  
-  sendBroadcast: (message) => 
-    fetchApi('/admin/broadcast', { 
-      method: 'POST', 
-      body: JSON.stringify({ message }) 
-    }),
+  // Add these methods to the api object in api.js
+
+// Admin Messages
+getAdminMessages: () => 
+  fetchApi('/admin-messages'),
+
+getAdminMessageById: (messageId) => 
+  fetchApi(`/admin-messages/${messageId}`),
+
+getAdminMessagesByAdminId: (adminId) => 
+  fetchApi(`/admin-messages/admin/${adminId}`),
+
+createAdminMessage: (messageData) => 
+  fetchApi('/admin-messages', { 
+    method: 'POST', 
+    body: JSON.stringify(messageData) 
+  }),
+
+updateAdminMessage: (messageData) => 
+  fetchApi('/admin-messages', { 
+    method: 'PUT', 
+    body: JSON.stringify(messageData) 
+  }),
+
+deleteAdminMessage: (messageId) => 
+  fetchApi(`/admin-messages/${messageId}`, { 
+    method: 'DELETE' 
+  }),
+
 };
 
 export default api;
