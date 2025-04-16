@@ -263,14 +263,53 @@ export const api = {
     }),
 
   
-  // Progress
-  getProgress: () => 
-    fetchApi('/progress'),
-  
-  updateProgress: (progressData) => 
-    fetchApi('/progress', { 
+  // Learning Updates
+  getLearningUpdates: (userId) => 
+    fetchApi(`/learning-updates/user/${userId}`),
+
+  getLearningUpdateById: (updateId) => 
+    fetchApi(`/learning-updates/${updateId}`),
+
+  getLearningUpdatesByStatus: (userId, status) => 
+    fetchApi(`/learning-updates/user/${userId}/status/${encodeURIComponent(status)}`),
+
+  getLearningUpdatesByCategory: (userId, category) => 
+    fetchApi(`/learning-updates/user/${userId}/category/${encodeURIComponent(category)}`),
+
+  getLearningUpdatesByType: (userId, type) => 
+    fetchApi(`/learning-updates/user/${userId}/type/${encodeURIComponent(type)}`),
+
+  getLearningUpdatesByLevel: (userId, level) => 
+    fetchApi(`/learning-updates/user/${userId}/level/${encodeURIComponent(level)}`),
+
+  createLearningUpdate: (updateData) => 
+    fetchApi('/learning-updates', { 
+      method: 'POST', 
+      body: JSON.stringify(updateData) 
+    }),
+
+  createLearningUpdateFromTemplate: (templateType, userId) => 
+    fetchApi(`/learning-updates/template?templateType=${encodeURIComponent(templateType)}&userId=${userId}`, { 
+      method: 'POST' 
+    }),
+
+  updateLearningUpdate: (updateData) => 
+    fetchApi(`/learning-updates/${updateData.updateId}`, { 
       method: 'PUT', 
-      body: JSON.stringify(progressData) 
+      body: JSON.stringify(updateData) 
+    }),
+
+  updateLearningUpdateStatus: (updateId, status, completionPercentage) => {
+    let url = `/learning-updates/${updateId}/status?status=${encodeURIComponent(status)}`;
+    if (completionPercentage !== undefined) {
+      url += `&completionPercentage=${completionPercentage}`;
+    }
+    return fetchApi(url, { method: 'PUT' });
+  },
+
+  deleteLearningUpdate: (updateId) => 
+    fetchApi(`/learning-updates/${updateId}`, { 
+      method: 'DELETE' 
     }),
   
   // Notifications

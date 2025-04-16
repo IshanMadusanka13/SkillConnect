@@ -23,4 +23,17 @@ public interface LearningUpdateService {
     List<LearningUpdate> findByType(String type);
 
     List<LearningUpdate> findByLevel(String level);
+    
+    // New methods
+    List<LearningUpdate> findByStatus(String status);
+    
+    List<LearningUpdate> findByUserIdAndStatus(int userId, String status);
+    
+    List<LearningUpdate> findByUserIdAndCategory(int userId, String category);
+    
+    List<LearningUpdate> findByUserIdAndType(int userId, String type);
+    
+    LearningUpdate createFromTemplate(String templateType, int userId);
+    
+    LearningUpdate updateStatus(int updateId, String status, Integer completionPercentage);
 }

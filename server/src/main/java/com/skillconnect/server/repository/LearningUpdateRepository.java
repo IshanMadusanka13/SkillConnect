@@ -12,4 +12,8 @@ public interface LearningUpdateRepository extends JpaRepository<LearningUpdate, 
     List<LearningUpdate> findByCategory(String category);
     List<LearningUpdate> findByType(String type);
     List<LearningUpdate> findByLevel(String level);
+    List<LearningUpdate> findByStatus(String status);
+    List<LearningUpdate> findByUser_UserIdAndStatus(int userId, String status);
+    List<LearningUpdate> findByUser_UserIdAndCategory(int userId, String category);
+    List<LearningUpdate> findByUser_UserIdAndType(int userId, String type);
 }

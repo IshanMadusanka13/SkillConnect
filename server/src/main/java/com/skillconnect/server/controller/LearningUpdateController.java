@@ -78,4 +78,50 @@ public class LearningUpdateController {
         List<LearningUpdate> updates = learningUpdateService.findByLevel(level);
         return new ResponseEntity<>(updates, HttpStatus.OK);
     }
+
+    // Add these endpoints to the existing controller
+
+@GetMapping("/status/{status}")
+public ResponseEntity<List<LearningUpdate>> getLearningUpdatesByStatus(@PathVariable String status) {
+    List<LearningUpdate> updates = learningUpdateService.findByStatus(status);
+    return new ResponseEntity<>(updates, HttpStatus.OK);
+}
+
+@GetMapping("/user/{userId}/status/{status}")
+public ResponseEntity<List<LearningUpdate>> getLearningUpdatesByUserIdAndStatus(
+        @PathVariable int userId, @PathVariable String status) {
+    List<LearningUpdate> updates = learningUpdateService.findByUserIdAndStatus(userId, status);
+    return new ResponseEntity<>(updates, HttpStatus.OK);
+}
+
+@GetMapping("/user/{userId}/category/{category}")
+public ResponseEntity<List<LearningUpdate>> getLearningUpdatesByUserIdAndCategory(
+        @PathVariable int userId, @PathVariable String category) {
+    List<LearningUpdate> updates = learningUpdateService.findByUserIdAndCategory(userId, category);
+    return new ResponseEntity<>(updates, HttpStatus.OK);
+}
+
+@GetMapping("/user/{userId}/type/{type}")
+public ResponseEntity<List<LearningUpdate>> getLearningUpdatesByUserIdAndType(
+        @PathVariable int userId, @PathVariable String type) {
+    List<LearningUpdate> updates = learningUpdateService.findByUserIdAndType(userId, type);
+    return new ResponseEntity<>(updates, HttpStatus.OK);
+}
+
+@PostMapping("/template")
+public ResponseEntity<LearningUpdate> createFromTemplate(
+        @RequestParam String templateType, @RequestParam int userId) {
+    LearningUpdate update = learningUpdateService.createFromTemplate(templateType, userId);
+    return new ResponseEntity<>(update, HttpStatus.CREATED);
+}
+
+@PutMapping("/{updateId}/status")
+public ResponseEntity<LearningUpdate> updateStatus(
+        @PathVariable int updateId, 
+        @RequestParam String status,
+        @RequestParam(required = false) Integer completionPercentage) {
+    LearningUpdate update = learningUpdateService.updateStatus(updateId, status, completionPercentage);
+    return new ResponseEntity<>(update, HttpStatus.OK);
+}
+
 }

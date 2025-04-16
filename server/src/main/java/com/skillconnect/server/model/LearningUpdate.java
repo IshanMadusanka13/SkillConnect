@@ -32,13 +32,38 @@ public class LearningUpdate {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "learning_method")
     private String learningMethod;
 
     @Column(name = "level")
     private String level;
+    
+    @Column(name = "status")
+    private String status;
+    
+    @Column(name = "completion_percentage")
+    private Integer completionPercentage;
+    
+    @Column(name = "target_date")
+    private LocalDateTime targetDate;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
