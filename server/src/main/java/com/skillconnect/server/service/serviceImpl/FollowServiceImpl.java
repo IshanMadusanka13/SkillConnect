@@ -118,7 +118,7 @@ public class FollowServiceImpl implements FollowService {
         log.debug("Getting followers for user ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        List<Follow> followers = followRepository.findByUser_UserId(userId);
+        List<Follow> followers = followRepository.findByFollower_userId(userId);
         log.debug("User ID {} has {} followers", userId, followers.size());
         return followers;
     }

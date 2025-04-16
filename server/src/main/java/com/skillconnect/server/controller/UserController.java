@@ -5,6 +5,7 @@ import com.skillconnect.server.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -90,21 +91,22 @@ public class UserController {
     }
 
     @GetMapping("/oauth2")
-    public void loginOAuth(HttpServletRequest request, HttpServletResponse response, @RequestParam("code") String code) throws IOException {
-        String token = userService.loginOAuth(code);
-        if (token != null) {
-            response.sendRedirect("http://localhost:5197/oauth2/success?token=" + token);
+    public void loginOAuth(HttpServletRequest request, HttpServletResponse response, @RequestParam("code") String code)
+            throws IOException {
+        Map<String, String> userDetails = userService.loginOAuth(code);
+        log.info("User details: " + userDetails);
+        if (userDetails.get("token") != null) {
+            response.sendRedirect("http://localhost:5173/oauth2/success?token=" + userDetails.get("token") + "&email="
+                    + userDetails.get("email"));
         } else {
-            response.sendRedirect("http://localhost:5197/oauth2/error");
+            response.sendRedirect("http://localhost:5173/oauth2/error");
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam String query) {
-    log.info("Searching users with query: {}", query);
-    List<User> users = userService.searchUsers(query);
-    return ResponseEntity.ok(users);
-}
+    @GetMapping("/search/{query}")
+    public ResponseEntity<List<User>> searchUsers(@PathVariable String query) {
+        List<User> users = userService.searchUsers(query);
+        return ResponseEntity.ok(users);
+    }
 
 }
-

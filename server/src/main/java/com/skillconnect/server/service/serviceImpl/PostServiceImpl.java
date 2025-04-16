@@ -94,12 +94,12 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> loadFeed(int userId) {
         log.info("Loading feed for user ID: {}", userId);
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         List<Follow> followers = followService.getFollowers(userId);
         List<Post> posts = postRepository.findByUser_UserId(userId);
         followers.forEach(follower -> {
-            posts.addAll(postRepository.findByUser_UserId(follower.getFollower().getUserId()));
+            posts.addAll(postRepository.findByUser_UserId(follower.getUser().getUserId()));
         });
         Collections.shuffle(posts);
         log.info("Loaded feed for user ID: {}", userId);

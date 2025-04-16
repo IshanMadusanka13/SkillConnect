@@ -161,23 +161,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String loginOAuth(String code) {
+    public Map<String, String> loginOAuth(String code) {
         OAuthService oAuthService = new OAuthServiceImpl(userRepository);
         User user = oAuthService.processGrantCode(code);
 
         String token = jwtTokenUtil.generateToken(user.getEmail());
+        Map<String, String> userDetails = new HashMap<>();
+        userDetails.put("token", token);
+        userDetails.put("email", user.getEmail());
 
         log.info("Login successful for user: {}", user.getEmail());
-        return token;
+        return userDetails;
     }
 
     @Override
     public List<User> searchUsers(String query) {
         log.debug("Searching users with query: {}", query);
-        List<User> users = userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query);
+        List<User> users = userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query,
+                query);
         log.debug("Found {} users matching query: {}", users.size(), query);
         return users;
     }
-
 
 }

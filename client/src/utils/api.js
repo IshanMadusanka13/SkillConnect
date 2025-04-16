@@ -92,7 +92,7 @@ export const api = {
     }),
 
   searchUsers: (query) => 
-    fetchApi(`/users/search?query=${encodeURIComponent(query)}`),
+    fetchApi(`/users/search/${encodeURIComponent(query)}`),
 
   // Add this to the api object in api.js
   getUserById: (userId) => 

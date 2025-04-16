@@ -11,7 +11,7 @@ public interface UserService {
     
     User saveUser(User user);
     Map<String, Object> login(User user);
-    String loginOAuth(String code);
+    Map<String, String> loginOAuth(String code);
     Optional<User> findById(int userId);
     User findByEmail(String email);
     List<User> findAllUsers();

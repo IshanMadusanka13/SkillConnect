@@ -17,6 +17,7 @@ const PostCard = ({ post, onPostUpdate }) => {
   
   // Check if the current user has liked this post
   useEffect(() => {
+    console.log('Post ID:', post);
     const checkIfLiked = async () => {
       if (currentUser && post.postId) {
         try {
