@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LearningPlanDTO {
 
+    private int planId;
     private String title;
     private String description;
     private LocalDate startDate;
@@ -44,6 +45,7 @@ public class LearningPlanDTO {
     public LearningPlanDTO EntityToDTO(LearningPlan learningPlan, List<LearningPlanItem> learningPlanItems, double status) {
 
         LearningPlanDTO learningPlanDTO = new LearningPlanDTO();
+        learningPlanDTO.setPlanId(learningPlan.getPlanId());
         learningPlanDTO.setTitle(learningPlan.getTitle());
         learningPlanDTO.setDescription(learningPlan.getDescription());
         learningPlanDTO.setStartDate(learningPlan.getStartDate());

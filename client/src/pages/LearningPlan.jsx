@@ -28,9 +28,11 @@ const LearningPlan = () => {
     }
   }, [currentUser]);
   
-  const fetchLearningPlans = async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchLearningPlans = async (forceRefresh = true) => {
+    if (forceRefresh) {
+      setIsLoading(true);
+      setError(null);
+    }
     
     try {
       const plans = await api.getLearningPlans(currentUser.userId);
@@ -39,7 +41,25 @@ const LearningPlan = () => {
       console.error('Error fetching learning plans:', err);
       setError('Failed to load learning plans. Please try again.');
     } finally {
-      setIsLoading(false);
+      if (forceRefresh) {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handlePlanUpdate = (updatedPlan, shouldRefresh = true) => {
+    if (updatedPlan) {
+      // Update just the specific plan in the state without fetching from the server
+      setLearningPlans(prevPlans => 
+        prevPlans.map(plan => 
+          plan.planId === updatedPlan.planId ? updatedPlan : plan
+        )
+      );
+    }
+    
+    // Only fetch from the server if shouldRefresh is true
+    if (shouldRefresh) {
+      fetchLearningPlans();
     }
   };
   
@@ -162,7 +182,7 @@ const LearningPlan = () => {
               <PlanItem 
                 key={plan.planId} 
                 plan={plan} 
-                onUpdate={fetchLearningPlans}
+                onUpdate={handlePlanUpdate}
                 onDelete={fetchLearningPlans}
               />
             ))}

@@ -61,7 +61,7 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
       const newItem = {
         title: newItemTitle,
         learningPlan: { planId: plan.planId },
-        isComplete: false
+        complete: false
       };
       
       await api.createLearningPlanItem(newItem);
@@ -76,34 +76,77 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
   
   const handleToggleItemComplete = async (itemId, isComplete) => {
     try {
+      // Create a local copy of the plan for optimistic updates
+      const updatedItems = plan.items.map(item => {
+        if (item.itemId === itemId) {
+          return { ...item, complete: !isComplete };
+        }
+        return item;
+      });
+      
+      // Calculate the new progress percentage
+      const totalItems = updatedItems.length;
+      const completedItems = updatedItems.filter(item => item.complete).length;
+      const newProgress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+      
+      // Optimistically update the UI with new progress
+      if (onUpdate) {
+        onUpdate({
+          ...plan,
+          items: updatedItems,
+          status: newProgress // Update the progress status
+        }, false);
+      }
+      
+      // Then perform the actual API call
       if (!isComplete) {
         await api.markItemAsCompleted(itemId);
       } else {
-        // If already complete, update to mark as incomplete
         const itemToUpdate = plan.items.find(item => item.itemId === itemId);
         if (itemToUpdate) {
           await api.updateLearningPlanItem({
             ...itemToUpdate,
-            isComplete: false
+            complete: false
           });
         }
       }
-      if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error updating item completion status:', error);
       alert('Failed to update item status. Please try again.');
+      
+      // If there was an error, revert the optimistic update by refreshing the data
+      if (onUpdate) onUpdate(null, true);
     }
   };
+  
+  
   
   const handleDeleteItem = async (itemId) => {
     if (!confirm('Are you sure you want to delete this item?')) return;
     
     try {
+      // Optimistically update UI before API call
+      const updatedItems = plan.items.filter(item => item.itemId !== itemId);
+      const totalItems = updatedItems.length;
+      const completedItems = updatedItems.filter(item => item.complete).length;
+      const newProgress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+      
+      if (onUpdate) {
+        onUpdate({
+          ...plan,
+          items: updatedItems,
+          status: newProgress
+        }, false);
+      }
+      
       await api.deleteLearningPlanItem(itemId);
-      if (onUpdate) onUpdate();
+      
+      // After successful deletion, do a full refresh to ensure consistency
+      if (onUpdate) onUpdate(null, true);
     } catch (error) {
       console.error('Error deleting item:', error);
       alert('Failed to delete item. Please try again.');
+      if (onUpdate) onUpdate(null, true);
     }
   };
   
@@ -190,15 +233,15 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
                   {plan.items.map((item) => (
                     <li key={item.itemId} className="flex items-center justify-between group">
                       <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={item.isComplete}
-                          onChange={() => handleToggleItemComplete(item.itemId, item.isComplete)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                      <input
+                        type="checkbox"
+                        checked={item.complete}
+                        onChange={() => handleToggleItemComplete(item.itemId, item.complete)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
                         <span 
                           className={`ml-2 text-sm ${
-                            item.isComplete 
+                            item.complete 
                               ? 'line-through text-gray-500 dark:text-gray-400' 
                               : 'text-gray-700 dark:text-gray-300'
                           }`}
