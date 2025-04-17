@@ -6,7 +6,6 @@ const OauthRedirect = () => {
         let params = new URLSearchParams(document.location.search);
         let token = params.get("token");
         let email = params.get("email");
-        console.log(token);
         localStorage.setItem("token", token);
         localStorage.setItem('userEmail', email);
         window.location.href = "/home";

@@ -19,7 +19,6 @@ const Admin = () => {
 
   // Fetch users and admin messages when component mounts
   useEffect(() => {
-    console.log("Current User:", currentUser);
     if (currentUser && currentUser.role === 'ADMIN' || currentUser.role === 'USER') {
       fetchUsers();
       fetchAdminMessages();

@@ -14,10 +14,10 @@ const PostCard = ({ post, onPostUpdate }) => {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [editingComment, setEditingComment] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
-  
+
   // Check if the current user has liked this post
   useEffect(() => {
-    console.log('Post ID:', post);
+    console.log(post)
     const checkIfLiked = async () => {
       if (currentUser && post.postId) {
         try {
@@ -30,10 +30,10 @@ const PostCard = ({ post, onPostUpdate }) => {
         }
       }
     };
-    
+
     checkIfLiked();
   }, [currentUser, post.postId]);
-  
+
   // Fetch comments when showing comments section
   useEffect(() => {
     const fetchComments = async () => {
@@ -46,15 +46,15 @@ const PostCard = ({ post, onPostUpdate }) => {
         }
       }
     };
-    
+
     if (showComments) {
       fetchComments();
     }
   }, [showComments, post.postId]);
-  
+
   const handleLike = async () => {
     if (!currentUser) return;
-    
+
     try {
       if (liked) {
         await api.unlikePost(post.postId, currentUser.userId);
@@ -64,7 +64,7 @@ const PostCard = ({ post, onPostUpdate }) => {
         setLikes(likes + 1);
       }
       setLiked(!liked);
-      
+
       // Notify parent component about the update
       if (onPostUpdate) {
         onPostUpdate(post.postId);
@@ -74,13 +74,13 @@ const PostCard = ({ post, onPostUpdate }) => {
       alert('Failed to process like. Please try again.');
     }
   };
-  
+
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!commentText.trim() || !currentUser) return;
-    
+
     setIsSubmittingComment(true);
-    
+
     try {
       const newComment = {
         content: commentText,
@@ -91,16 +91,14 @@ const PostCard = ({ post, onPostUpdate }) => {
           postId: post.postId
         }
       };
-      
-      console.log('Sending comment data:', newComment); // Add this for debugging
-      
+
+
       const createdComment = await api.createComment(newComment);
-      console.log('Received created comment:', createdComment); // Add this for debugging
-      
+
       // Add the new comment to the list
       setComments(prevComments => [...prevComments, createdComment]);
       setCommentText('');
-      
+
       // Notify parent component about the update
       if (onPostUpdate) {
         onPostUpdate(post.postId);
@@ -112,34 +110,34 @@ const PostCard = ({ post, onPostUpdate }) => {
       setIsSubmittingComment(false);
     }
   };
-  
-  
+
+
   const handleEditComment = (comment) => {
     setEditingComment(comment);
     setEditCommentText(comment.content);
   };
-  
+
   const handleUpdateComment = async (e) => {
     e.preventDefault();
     if (!editCommentText.trim() || !editingComment) return;
-    
+
     try {
       const updatedComment = {
         ...editingComment,
         content: editCommentText
       };
-      
+
       const result = await api.updateComment(updatedComment);
-      
+
       // Update the comment in the list
-      setComments(comments.map(c => 
+      setComments(comments.map(c =>
         c.commentId === editingComment.commentId ? result : c
       ));
-      
+
       // Reset editing state
       setEditingComment(null);
       setEditCommentText('');
-      
+
       // Notify parent component about the update
       if (onPostUpdate) {
         onPostUpdate(post.postId);
@@ -149,16 +147,16 @@ const PostCard = ({ post, onPostUpdate }) => {
       alert('Failed to update comment. Please try again.');
     }
   };
-  
+
   const handleDeleteComment = async (commentId) => {
     if (!confirm('Are you sure you want to delete this comment?')) return;
-    
+
     try {
       await api.deleteComment(commentId);
-      
+
       // Remove the comment from the list
       setComments(comments.filter(c => c.commentId !== commentId));
-      
+
       // Notify parent component about the update
       if (onPostUpdate) {
         onPostUpdate(post.postId);
@@ -172,32 +170,32 @@ const PostCard = ({ post, onPostUpdate }) => {
   // Default values
   const defaultAvatar = "/assets/images/default-avatar.png";
   const defaultDate = new Date().toLocaleDateString();
-  
+
   // Check if we're dealing with the backend API structure or the frontend dummy data structure
   const isBackendData = post.user && post.description;
-  
+
   // Extract data based on the structure
-  const authorName = isBackendData 
-    ? `${post.user.firstName || ''} ${post.user.lastName || ''}`.trim() 
+  const authorName = isBackendData
+    ? `${post.user.firstName || ''} ${post.user.lastName || ''}`.trim()
     : (post.author ? post.author.name : 'Unknown User');
-  
+
   const authorAvatar = isBackendData
     ? (post.user.profileImage || defaultAvatar)
     : (post.author ? post.author.avatar : defaultAvatar);
-  
+
   const postContent = isBackendData ? post.description : post.content;
   const postTitle = isBackendData ? (post.title || '') : post.title;
-  const postDate = isBackendData 
+  const postDate = isBackendData
     ? (post.createdAt ? new Date(post.createdAt).toLocaleDateString() : defaultDate)
     : (post.createdAt || defaultDate);
-  
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="p-4">
         <div className="flex items-center mb-4">
-          <img 
-            src={authorAvatar} 
-            alt={authorName} 
+          <img
+            src={authorAvatar}
+            alt={authorName}
             className="h-10 w-10 rounded-full mr-3 object-cover"
             onError={(e) => {
               e.target.onerror = null;
@@ -209,25 +207,90 @@ const PostCard = ({ post, onPostUpdate }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400">{postDate}</p>
           </div>
         </div>
-        
+
         {postTitle && (
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{postTitle}</h2>
         )}
         <p className="text-gray-700 dark:text-gray-300 mb-4">{postContent}</p>
-        
+
+
+        {(post.media1 || post.media2 || post.media3) && (
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {post.media1 && (
+              <div className="rounded-lg overflow-hidden max-h-64">
+                {post.media1.includes('.mp4') || post.media1.includes('.webm') || post.media1.includes('.ogg') ? (
+                  <video
+                    src={post.media1}
+                    className="w-full h-auto object-cover max-h-64"
+                    controls
+                  />
+                ) : (
+                  <img
+                    src={post.media1}
+                    alt="Post media 1"
+                    className="w-full h-auto object-contain max-h-64"
+                    onClick={() => window.open(post.media1, '_blank')}
+                    style={{ cursor: 'pointer' }}
+                  />
+                )}
+              </div>
+            )}
+
+            {post.media2 && (
+              <div className="rounded-lg overflow-hidden max-h-64">
+                {post.media2.includes('.mp4') || post.media2.includes('.webm') || post.media2.includes('.ogg') ? (
+                  <video
+                    src={post.media2}
+                    className="w-full h-auto object-cover max-h-64"
+                    controls
+                  />
+                ) : (
+                  <img
+                    src={post.media2}
+                    alt="Post media 2"
+                    className="w-full h-auto object-contain max-h-64"
+                    onClick={() => window.open(post.media2, '_blank')}
+                    style={{ cursor: 'pointer' }}
+                  />
+                )}
+              </div>
+            )}
+
+            {post.media3 && (
+              <div className="rounded-lg overflow-hidden max-h-64">
+                {post.media3.includes('.mp4') || post.media3.includes('.webm') || post.media3.includes('.ogg') ? (
+                  <video
+                    src={post.media3}
+                    className="w-full h-auto object-cover max-h-64"
+                    controls
+                  />
+                ) : (
+                  <img
+                    src={post.media3}
+                    alt="Post media 3"
+                    className="w-full h-auto object-contain max-h-64"
+                    onClick={() => window.open(post.media3, '_blank')}
+                    style={{ cursor: 'pointer' }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {post.image && (
           <div className="mb-4 rounded-lg overflow-hidden">
-            <img 
-              src={post.image} 
-              alt={postTitle || "Post image"} 
+            <img
+              src={post.image}
+              alt={postTitle || "Post image"}
               className="w-full h-auto object-cover"
             />
           </div>
         )}
-        
+
         <div className="flex items-center justify-between text-gray-500 dark:text-gray-400">
           <div className="flex space-x-4">
-            <button 
+            <button
               onClick={handleLike}
               className={`flex items-center space-x-1 ${liked ? 'text-red-500 dark:text-red-400' : ''}`}
             >
@@ -238,26 +301,26 @@ const PostCard = ({ post, onPostUpdate }) => {
               )}
               <span>{likes}</span>
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setShowComments(!showComments)}
               className="flex items-center space-x-1"
             >
               <ChatIcon className="h-5 w-5" />
               <span>{comments.length}</span>
             </button>
-            
+
             <button className="flex items-center space-x-1">
               <ShareIcon className="h-5 w-5" />
             </button>
           </div>
-          
+
           <button className="flex items-center space-x-1">
             <BookmarkIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
-      
+
       {showComments && (
         <div className="border-t border-gray-200 dark:border-slate-700 p-4">
           <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Comments</h3>
@@ -265,16 +328,16 @@ const PostCard = ({ post, onPostUpdate }) => {
             {comments.length > 0 ? (
               comments.map((comment) => (
                 <div key={comment.commentId || comment.id} className="flex items-start group">
-                  <img 
-                    src={comment.user?.profileImage || (comment.author?.avatar) || defaultAvatar} 
-                    alt={comment.user?.firstName || comment.author?.name || "Commenter"} 
+                  <img
+                    src={comment.user?.profileImage || (comment.author?.avatar) || defaultAvatar}
+                    alt={comment.user?.firstName || comment.author?.name || "Commenter"}
                     className="h-8 w-8 rounded-full mr-2 object-cover"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = defaultAvatar;
                     }}
                   />
-                  
+
                   {editingComment && editingComment.commentId === comment.commentId ? (
                     <div className="flex-1">
                       <form onSubmit={handleUpdateComment}>
@@ -306,28 +369,28 @@ const PostCard = ({ post, onPostUpdate }) => {
                     <div className="flex-1 bg-gray-50 dark:bg-slate-700/50 rounded-lg p-2">
                       <div className="flex justify-between items-center mb-1">
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                          {comment.user 
-                            ? `${comment.user.firstName || ''} ${comment.user.lastName || ''}`.trim() 
+                          {comment.user
+                            ? `${comment.user.firstName || ''} ${comment.user.lastName || ''}`.trim()
                             : (comment.author?.name || "Anonymous")}
                         </h4>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {comment.createdAt 
-                            ? new Date(comment.createdAt).toLocaleDateString() 
+                          {comment.createdAt
+                            ? new Date(comment.createdAt).toLocaleDateString()
                             : "Recently"}
                         </span>
                       </div>
                       <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
-                      
+
                       {/* Comment actions - only show for the comment author */}
                       {currentUser && (comment.user?.userId === currentUser.userId) && (
                         <div className="mt-1 flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
+                          <button
                             onClick={() => handleEditComment(comment)}
                             className="p-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                           >
                             <PencilIcon className="h-3 w-3" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDeleteComment(comment.commentId)}
                             className="p-1 text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                           >
@@ -344,12 +407,12 @@ const PostCard = ({ post, onPostUpdate }) => {
                 No comments yet. Be the first to comment!
               </p>
             )}
-            
+
             {currentUser && (
               <form onSubmit={handleAddComment} className="flex items-start mt-4">
-                <img 
-                  src={currentUser.profileImage || defaultAvatar} 
-                  alt={`${currentUser.firstName} ${currentUser.lastName}`} 
+                <img
+                  src={currentUser.profileImage || defaultAvatar}
+                  alt={`${currentUser.firstName} ${currentUser.lastName}`}
                   className="h-8 w-8 rounded-full mr-2 object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
