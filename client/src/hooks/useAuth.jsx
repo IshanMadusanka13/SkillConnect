@@ -49,13 +49,11 @@ export const AuthProvider = ({ children }) => {
       setError(null);
 
       // Simulate login API call
-      
-      console.log('Login response:', response);
+      const response = await api.login(credentials);
       localStorage.setItem('token', response.token);
       localStorage.setItem('userEmail', credentials.email);
       // Use email to fetch user
       const user = await api.getCurrentUser(credentials.email);
-      
       setCurrentUser(user);
 
       return { success: true };

@@ -2,6 +2,7 @@ const API_URL = 'http://localhost:8080/api'; // Replace with your actual API URL
 
 // Helper function for making API requests
 const fetchApi = async (endpoint, options = {}) => {
+  console.log(endpoint)
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -19,10 +20,14 @@ const fetchApi = async (endpoint, options = {}) => {
     headers,
   };
 
+  console.log(endpoint)
+
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
     // console.log('API Request:', { endpoint, options });
     // console.log('API Response:', response);
+
+    console.log(response)
 
     // Handle 401 Unauthorized
     if (response.status === 401) {

@@ -5,7 +5,6 @@ import com.skillconnect.server.model.User;
 import com.skillconnect.server.repository.LearningUpdateRepository;
 import com.skillconnect.server.repository.UserRepository;
 import com.skillconnect.server.service.LearningUpdateService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

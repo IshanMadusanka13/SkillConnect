@@ -109,6 +109,7 @@ public class LearningPlanServiceImpl implements LearningPlanService {
     @Override
     public void deleteLearningPlan(int planId) {
         log.info("Deleting learning plan with ID: {}", planId);
+        learningPlanItemRepository.deleteByLearningPlan_PlanId(planId);
         learningPlanRepository.deleteById(planId);
         log.info("Learning plan deleted successfully: {}", planId);
     }

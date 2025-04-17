@@ -26,12 +26,13 @@ const Login = () => {
     setIsLoading(true);
     setLoginError(null);
     
+
     try {
       const { success, error } = await login({
         email: formData.email,
         password: formData.password
       });
-      
+
       if (success) {
         // Redirect to dashboard or home page after successful login
         navigate('/home');

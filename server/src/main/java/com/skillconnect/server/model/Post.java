@@ -42,8 +42,8 @@ public class Post {
     private String media3;
 
     @ManyToOne
-    @JoinColumn(name = "learning_plan_id")
-    private LearningPlan learningPlan;
+    @JoinColumn(name = "learning_update_id")
+    private LearningUpdate learningUpdate;
 
     @PrePersist
     protected void onCreate() {
