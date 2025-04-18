@@ -83,7 +83,7 @@ export const api = {
   getUserProfile: (username) => 
     fetchApi(`/users/${username}`),
   
- // Update this method in your api.js file
+ 
   updateUserProfile: (userData) => 
     fetchApi(`/users/${userData.userId}/update`, { 
       method: 'PUT', 
@@ -93,9 +93,12 @@ export const api = {
   searchUsers: (query) => 
     fetchApi(`/users/search/${encodeURIComponent(query)}`),
 
-  // Add this to the api object in api.js
+  
   getUserById: (userId) => 
     fetchApi(`/users/${userId}`),
+
+  getUsers: () => 
+    fetchApi(`/users`),
 
 
   
@@ -312,16 +315,33 @@ export const api = {
     }),
   
   // Notifications
-  getNotifications: () => 
-    fetchApi('/notifications'),
+  getNotifications: (userId) => 
+    fetchApi(`/notifications/user/${userId}`),
+  
+  getUnreadNotifications: (userId) => 
+    fetchApi(`/notifications/user/${userId}/unread`),
   
   markNotificationAsRead: (notificationId) => 
     fetchApi(`/notifications/${notificationId}/read`, { 
       method: 'PUT' 
     }),
   
-  // Add these methods to the api object in api.js
-
+  markAllNotificationsAsRead: (userId) => 
+    fetchApi(`/notifications/user/${userId}/read-all`, { 
+      method: 'PUT' 
+    }),
+  
+  deleteNotification: (notificationId) => 
+    fetchApi(`/notifications/${notificationId}`, { 
+      method: 'DELETE' 
+    }),
+  
+  deleteAllNotifications: (userId) => 
+    fetchApi(`/notifications/user/${userId}`, { 
+      method: 'DELETE' 
+    }),
+  
+  
 // Admin Messages
 getAdminMessages: () => 
   fetchApi('/admin-messages'),

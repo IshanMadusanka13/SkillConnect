@@ -34,6 +34,23 @@ const PostCard = ({ post, onPostUpdate }) => {
     checkIfLiked();
   }, [currentUser, post.postId]);
 
+  // Add this useEffect to fetch comment count on component mount
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      if (post.postId) {
+        try {
+          const fetchedComments = await api.getComments(post.postId);
+          setComments(fetchedComments);
+        } catch (error) {
+          console.error('Error fetching comment count:', error);
+        }
+      }
+    };
+
+    fetchCommentCount();
+  }, [post.postId]);
+
+
   // Fetch comments when showing comments section
   useEffect(() => {
     const fetchComments = async () => {

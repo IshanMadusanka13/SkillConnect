@@ -28,14 +28,18 @@ const Login = () => {
     
 
     try {
-      const { success, error } = await login({
+      const { success, error, user } = await login({
         email: formData.email,
         password: formData.password
       });
 
       if (success) {
-        // Redirect to dashboard or home page after successful login
-        navigate('/home');
+        console.log('User logged in:', user);
+        if (user && user.role === "ADMIN") {
+          navigate('/admin');
+        } else {
+          navigate('/home');
+        }
       } else {
         setLoginError(error || 'Login failed. Please try again.');
       }

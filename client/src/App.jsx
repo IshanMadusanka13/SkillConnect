@@ -2,8 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../src/hooks/useAuth';
 import { ThemeProvider } from '../src/contexts/ThemeContext';
-
-// Pages
 import Login from '../src/pages/auth/Login';
 import Register from '../src/pages/auth/Register';
 import Home from '../src/pages/Home';

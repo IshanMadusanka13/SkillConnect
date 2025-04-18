@@ -19,7 +19,7 @@ public class AdminMessage {
     @Column(name = "message_id")
     private int messageId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User admin;
 

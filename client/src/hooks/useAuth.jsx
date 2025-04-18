@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
       const user = await api.getCurrentUser(credentials.email);
       setCurrentUser(user);
 
-      return { success: true };
+      return { success: true, user};
     } catch (err) {
       setError(err.message || 'Login failed');
       return { success: false, error: err.message };

@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell';
 import { dummyPosts } from '../data/dummyPosts';
 import PostCard from '../components/ui/PostCard';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
-import { XIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
+import { XIcon, PencilIcon, TrashIcon, PhotographIcon } from '@heroicons/react/outline';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client (same as in TopBar.jsx)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const Profile = () => {
   const { currentUser, loading } = useAuth();
@@ -25,8 +31,14 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   
+  // Profile image upload states
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef(null);
+  
   // Initialize form data when currentUser changes
-  // Initialize form data and fetch user data when currentUser changes
   useEffect(() => {
     if (currentUser) {
       setFormData({
@@ -55,10 +67,92 @@ const Profile = () => {
     }
   }, [currentUser]);
 
+  // Handle file selection for profile image
+  const handleProfileImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setProfileImageFile(file);
+    setProfileImagePreview(previewUrl);
+    
+    // Update form data with the preview for immediate visual feedback
+    setFormData(prev => ({
+      ...prev,
+      profileImage: previewUrl
+    }));
+  };
+  
+  // Upload profile image to Supabase
+  const uploadProfileImage = async () => {
+    if (!profileImageFile) return null;
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    
+    try {
+      // Create a unique file name
+      const fileExt = profileImageFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `profiles/${currentUser.userId}/${fileName}`;
+      
+      // Upload to Supabase
+      const { data, error } = await supabase.storage
+        .from('skillconnect')
+        .upload(filePath, profileImageFile, {
+          cacheControl: '3600',
+          upsert: false,
+          onUploadProgress: (progress) => {
+            const percentage = (progress.loaded / progress.total) * 100;
+            setUploadProgress(percentage);
+          }
+        });
+      
+      if (error) {
+        console.error('Supabase upload error:', error);
+        throw error;
+      }
+      
+      // Get the public URL
+      const { data: urlData } = supabase.storage
+        .from('skillconnect')
+        .getPublicUrl(filePath);
+      
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
 
   const handlePostUpdate = async (postId) => {
-    // Refresh the posts to get the updated data
-    await fetchUserPosts();
+    try {
+      // Fetch just the updated post
+      const updatedPost = await api.getPostById(postId);
+
+      // Also fetch the latest comments for this post
+      const comments = await api.getComments(postId);
+      updatedPost.comments = comments;
+      
+      // Update only this post in the state
+      setUserPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.postId === postId ? updatedPost : post
+        )
+      );
+    } catch (error) {
+      console.error('Error updating post data:', error);
+    }
   };
   
   // Fetch user posts
@@ -71,7 +165,19 @@ const Profile = () => {
     try {
       // Use the specific endpoint for user posts
       const posts = await api.getUserPosts(currentUser.userId);
-      setUserPosts(posts);
+
+      // For each post, fetch the latest comments
+      const postsWithComments = await Promise.all(posts.map(async (post) => {
+        try {
+          const comments = await api.getComments(post.postId);
+          return { ...post, comments };
+        } catch (error) {
+          console.error(`Error fetching comments for post ${post.postId}:`, error);
+          return post;
+        }
+      }));
+
+      setUserPosts(postsWithComments);
     } catch (error) {
       setPostsError(error.message || 'Failed to fetch posts');
       console.error('Error fetching posts:', error);
@@ -162,14 +268,31 @@ const Profile = () => {
     setUpdateSuccess(false);
     
     try {
+      // First upload profile image if a new one was selected
+      let profileImageUrl = formData.profileImage;
+      
+      if (profileImageFile) {
+        profileImageUrl = await uploadProfileImage();
+      }
+      
       // We need to send the userId to match the backend endpoint
       const updatedUser = await api.updateUserProfile({
         ...formData,
+        profileImage: profileImageUrl,
         userId: currentUser.userId
       });
       
       setUpdateSuccess(true);
       setIsEditing(false);
+      
+      // Clean up object URL to avoid memory leaks
+      if (profileImagePreview) {
+        URL.revokeObjectURL(profileImagePreview);
+        setProfileImagePreview(null);
+      }
+      
+      // Reset file input
+      setProfileImageFile(null);
       
       // Refresh the page after successful update to get the updated user data
       setTimeout(() => {
@@ -211,6 +334,21 @@ const Profile = () => {
               <p className="text-gray-600 dark:text-gray-300 mt-2">
                 {currentUser.bio || 'No bio available'}
               </p>
+              
+              <div className="flex space-x-8 mt-4">
+                <div className="text-center">
+                  <span className="block text-2xl font-bold text-gray-900 dark:text-white">{userPosts.length}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Posts</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-2xl font-bold text-gray-900 dark:text-white">{followerCount}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Followers</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-2xl font-bold text-gray-900 dark:text-white">{followingCount}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Following</span>
+                </div>
+              </div>
               
               <div className="mt-4 flex space-x-4">
                 <button 
@@ -270,19 +408,76 @@ const Profile = () => {
                   </div>
                 </div>
                 
+                {/* Profile Image Upload Section */}
                 <div>
-                  <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Profile Image URL
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Profile Image
                   </label>
-                  <input
-                    type="url"
-                    id="profileImage"
-                    name="profileImage"
-                    value={formData.profileImage}
-                    onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                      <img
+                        src={formData.profileImage || defaultProfileImage}
+                        alt="Profile preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultProfileImage;
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="flex flex-col space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current.click()}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 flex items-center"
+                      >
+                        <PhotographIcon className="h-5 w-5 mr-2" />
+                        Choose Image
+                      </button>
+                      
+                      {formData.profileImage && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, profileImage: '' }));
+                            setProfileImageFile(null);
+                            if (profileImagePreview) {
+                              URL.revokeObjectURL(profileImagePreview);
+                              setProfileImagePreview(null);
+                            }
+                          }}
+                          className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors duration-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 flex items-center"
+                        >
+                          <TrashIcon className="h-5 w-5 mr-2" />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleProfileImageSelect}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                  </div>
+                  
+                  {isUploading && (
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                        <div
+                          className="bg-blue-600 h-2.5 rounded-full"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Uploading image... {Math.round(uploadProgress)}%
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 <div>
@@ -292,22 +487,38 @@ const Profile = () => {
                   <textarea
                     id="bio"
                     name="bio"
-                    rows={3}
+                    rows={4}
                     value={formData.bio}
                     onChange={handleChange}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                    placeholder="Tell us about yourself"
+                    placeholder="Tell us about yourself..."
                   />
                 </div>
                 
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => {
+                      setIsEditing(false);
+                      // Reset form data to current user data
+                      setFormData({
+                        firstName: currentUser.firstName || '',
+                        lastName: currentUser.lastName || '',
+                        bio: currentUser.bio || '',
+                        profileImage: currentUser.profileImage || '',
+                      });
+                      // Clean up any file preview
+                      if (profileImagePreview) {
+                        URL.revokeObjectURL(profileImagePreview);
+                        setProfileImagePreview(null);
+                      }
+                      setProfileImageFile(null);
+                    }}
                     className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                   >
                     Cancel
                   </button>
+                  
                   <button
                     type="submit"
                     disabled={updateLoading}
@@ -319,31 +530,19 @@ const Profile = () => {
               </form>
             </div>
           )}
-          
-          <div className="mt-6 flex space-x-4">
-            <div className="text-center">
-              <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                {followerCount}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Followers</span>
-            </div>
-            <div className="text-center">
-              <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                {followingCount}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Following</span>
-            </div>
-            <div className="text-center">
-              <span className="block text-2xl font-bold text-gray-900 dark:text-white">
-                {userPosts.length || 0}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Posts</span>
-            </div>
-          </div>
         </div>
         
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Posts</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-6">
+            
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Your Posts</h2>
+          </div>
+          <div>
+            {/* You can add any right-side content here if needed */}
+          </div>
+        </div>
+
           
           {postsLoading ? (
             <div className="flex justify-center items-center h-32">
@@ -351,7 +550,7 @@ const Profile = () => {
             </div>
           ) : postsError ? (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              Failed to load posts: {postsError}
+              {postsError}
             </div>
           ) : userPosts.length === 0 ? (
             <div className="p-6 bg-gray-50 dark:bg-slate-700 rounded-lg text-center">
@@ -361,107 +560,91 @@ const Profile = () => {
             <div className="space-y-6">
               {userPosts.map(post => (
                 <div key={post.postId} className="relative">
-                  <PostCard post={post} onPostUpdate={handlePostUpdate} />
-                  
-                  {/* Post actions */}
-                  <div className="absolute top-4 right-4 flex space-x-2">
-                    <button 
+                  <div className="absolute top-2 right-2 flex space-x-2 z-10">
+                    <button
                       onClick={() => handleEditPost(post)}
-                      className="p-1.5 bg-white dark:bg-slate-700 rounded-full shadow-sm hover:bg-gray-100 dark:hover:bg-slate-600"
+                      className="p-1.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                     >
-                      <PencilIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                      <PencilIcon className="h-4 w-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDeletePost(post.postId)}
-                      className="p-1.5 bg-white dark:bg-slate-700 rounded-full shadow-sm hover:bg-gray-100 dark:hover:bg-slate-600"
+                      className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors duration-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                     >
-                      <TrashIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <TrashIcon className="h-4 w-4" />
                     </button>
                   </div>
+                  <PostCard post={post} onPostUpdate={handlePostUpdate} />
                 </div>
               ))}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-  
-        {/* Edit Post Modal */}
-        {showEditPostModal && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+      </div>
+      
+      {/* Edit Post Modal */}
+      {showEditPostModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="absolute top-0 right-0 pt-4 pr-4">
+                <button
+                  onClick={() => setShowEditPostModal(false)}
+                  className="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none"
+                >
+                  <XIcon className="h-6 w-6" />
+                </button>
               </div>
-  
-              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
-  
-              <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div className="absolute top-0 right-0 pt-4 pr-4">
-                  <button
-                    onClick={() => setShowEditPostModal(false)}
-                    className="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 focus:outline-none"
-                  >
-                    <XIcon className="h-6 w-6" />
-                  </button>
-                </div>
+              
+              <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Edit Post</h3>
                 
-                <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Edit Post</h3>
+                <form onSubmit={handleUpdatePost}>
+                  <div className="mb-4">
+                    <label htmlFor="postContent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Content
+                    </label>
+                    <textarea
+                      id="postContent"
+                      value={editPostData.content}
+                      onChange={(e) => setEditPostData({...editPostData, content: e.target.value})}
+                      rows={5}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                      required
+                    />
+                  </div>
                   
-                  <form onSubmit={handleUpdatePost}>
-                    <div className="mb-4">
-                      <label htmlFor="editPostTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Title
-                      </label>
-                      <input
-                        type="text"
-                        id="editPostTitle"
-                        value={editPostData.title}
-                        onChange={(e) => setEditPostData({...editPostData, title: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                        placeholder="Enter a title for your post"
-                      />
-                    </div>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditPostModal(false)}
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                    >
+                      Cancel
+                    </button>
                     
-                    <div className="mb-4">
-                      <label htmlFor="editPostContent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Content
-                      </label>
-                      <textarea
-                        id="editPostContent"
-                        value={editPostData.content}
-                        onChange={(e) => setEditPostData({...editPostData, content: e.target.value})}
-                        rows={5}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                        placeholder="What's on your mind?"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="mt-5 sm:mt-6 flex justify-end space-x-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowEditPostModal(false)}
-                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                      >
-                        Save Changes
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
-        )}
-      </AppShell>
-    );
-  };
-  
-  export default Profile;
-  
+        </div>
+      )}
+    </AppShell>
+  );
+};
+
+export default Profile;
+

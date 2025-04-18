@@ -28,6 +28,7 @@ const TopBar = () => {
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   // Default avatar if no user or no profile image
   const defaultAvatar = "/assets/images/default-avatar.png";
@@ -235,6 +236,26 @@ const TopBar = () => {
     navigate(`/user/${userId}`);
   };
 
+  useEffect(() => {
+    const fetchUnreadNotifications = async () => {
+      if (currentUser) {
+        try {
+          const unreadNotifications = await api.getUnreadNotifications(currentUser.userId);
+          setUnreadNotificationsCount(unreadNotifications.length);
+        } catch (error) {
+          console.error('Error fetching unread notifications:', error);
+        }
+      }
+    };
+  
+    fetchUnreadNotifications();
+    
+    // Set up polling to check for new notifications every minute
+    const intervalId = setInterval(fetchUnreadNotifications, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, [currentUser]);
+
   const mediaUploadSection = (
     <div className="mb-4">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -401,18 +422,26 @@ const TopBar = () => {
                   <MoonIcon className="h-6 w-6" />
                 )}
               </button>
-              <button className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-slate-700">
-                <BellIcon className="h-6 w-6" />
-                <span className="absolute top-3 right-3 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-800"></span>
-              </button>
+              
+              <Link to="/notifications">
+                <button className="relative p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-slate-700">
+                  <BellIcon className="h-6 w-6" />
+                  {unreadNotificationsCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
+                      {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                    </span>
+                  )}
+                </button>
+              </Link>
+
 
               {!isMobile && (
                 <button
                   onClick={() => setShowCreatePostModal(true)}
-                  className="flex items-center space-x-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
                 >
-                  <PlusIcon className="h-5 w-5" />
-                  <span>Create</span>
+                  
+                  <span className="mr-2">+</span> Create Post
                 </button>
               )}
 
@@ -420,7 +449,7 @@ const TopBar = () => {
                 <Link to="/profile">
                   <button className="flex rounded-full bg-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700">
                     <img
-                      className="h-8 w-8 rounded-full border-2 border-white dark:border-slate-700 object-cover"
+                      className="h-8 w-8 rounded-full border-2 border-white dark:border-slate-700 object-cover overflow-hidden"
                       src={profileImage}
                       alt={currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "User avatar"}
                       onError={(e) => {

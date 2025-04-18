@@ -17,9 +17,11 @@ const Admin = () => {
   const [editingMessage, setEditingMessage] = useState(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
 
-  // Fetch users and admin messages when component mounts
+  console.log('Current User:', currentUser);
+
+  //Fetch users and admin messages when component mounts
   useEffect(() => {
-    if (currentUser && currentUser.role === 'ADMIN' || currentUser.role === 'USER') {
+    if (currentUser && currentUser.role === 'ADMIN') {
       fetchUsers();
       fetchAdminMessages();
     }
@@ -176,7 +178,7 @@ const Admin = () => {
               </div>
             </div>
             
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 flex items-center">
+            {/* <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 flex items-center">
               <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-3 mr-4">
                 <svg className="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -186,7 +188,7 @@ const Admin = () => {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Active Plans</h3>
                 <p className="text-3xl font-bold text-green-600 dark:text-green-400">12</p>
               </div>
-            </div>
+            </div> */}
             
             <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 flex items-center">
               <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-3 mr-4">
@@ -321,11 +323,11 @@ const Admin = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Role
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
-                  </th>
+                  </th> */}
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Actions
+                  Status
                   </th>
                 </tr>
               </thead>
@@ -338,12 +340,12 @@ const Admin = () => {
                           {user.profileImage ? (
                             <img src={user.profileImage} alt={user.name} className="h-10 w-10 rounded-full" />
                           ) : (
-                            <span className="text-gray-500 dark:text-gray-400">{user.name?.charAt(0)}</span>
+                            <span className="text-gray-500 dark:text-gray-400">{user.firstName?.charAt(0)}</span>
                           )}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {user.name}
+                            {user.firstName} {user.lastName}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             @{user.username}
@@ -355,30 +357,18 @@ const Admin = () => {
                       <div className="text-sm text-gray-900 dark:text-white">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={user.role}
-                        onChange={async (e) => {
-                          try {
-                            await api.updateUserRole(user.userId, e.target.value);
-                            fetchUsers(); // Refresh user list
-                          } catch (err) {
-                            console.error('Error updating user role:', err);
-                            alert('Failed to update user role. Please try again.');
-                          }
-                        }}
-                        className="text-sm rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                      >
-                        <option value="USER">User</option>
-                        <option value="ADMIN">Admin</option>
-                      </select>
+                    <div className="text-sm text-gray-900 dark:text-white">{user.role}</div>
+                        
+                        
+                        
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    {/* <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         user.active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                       }`}>
                         {user.active ? 'Active' : 'Inactive'}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       <button
                         onClick={async () => {

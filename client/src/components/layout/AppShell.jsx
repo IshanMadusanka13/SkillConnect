@@ -1,7 +1,6 @@
 import React from 'react';
 import LeftSidebar from './LeftSidebar';
 import TopBar from './TopBar';
-import RightSidebar from './RightSidebar';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import AdminMessageBanner from '../ui/AdminMessageBanner';
 
@@ -20,7 +19,6 @@ const AppShell = ({ children }) => {
           </div>
         </main>
       </div>
-      {isLargeScreen && <RightSidebar />}
     </div>
   );
 };
