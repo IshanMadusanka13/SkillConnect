@@ -3,6 +3,7 @@ import { HeartIcon, ChatIcon, ShareIcon, BookmarkIcon, TrashIcon, PencilIcon } f
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
 import { useAuth } from '../../hooks/useAuth';
 import { api } from '../../utils/api';
+import ReactMarkdown from 'react-markdown';
 
 const PostCard = ({ post, onPostUpdate }) => {
   const { currentUser } = useAuth();
@@ -228,7 +229,14 @@ const PostCard = ({ post, onPostUpdate }) => {
         {postTitle && (
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{postTitle}</h2>
         )}
-        <p className="text-gray-700 dark:text-gray-300 mb-4">{postContent}</p>
+        <ReactMarkdown
+          components={{
+            p: ({node, ...props}) => <p className="text-gray-700 dark:text-gray-300 mb-4" {...props} />,
+            a: ({node, ...props}) => <a className="text-blue-500 hover:underline" {...props} />
+          }}
+        >
+          {postContent}
+        </ReactMarkdown>
 
 
         {(post.media1 || post.media2 || post.media3) && (
@@ -399,14 +407,16 @@ const PostCard = ({ post, onPostUpdate }) => {
                       <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
 
                       {/* Comment actions - only show for the comment author */}
-                      {currentUser && (comment.user?.userId === currentUser.userId) && (
+                      
                         <div className="mt-1 flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {currentUser && (comment.user?.userId === currentUser.userId) && (
                           <button
                             onClick={() => handleEditComment(comment)}
                             className="p-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                           >
                             <PencilIcon className="h-3 w-3" />
                           </button>
+                          )}
                           <button
                             onClick={() => handleDeleteComment(comment.commentId)}
                             className="p-1 text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
@@ -414,7 +424,8 @@ const PostCard = ({ post, onPostUpdate }) => {
                             <TrashIcon className="h-3 w-3" />
                           </button>
                         </div>
-                      )}
+                      
+                      
                     </div>
                   )}
                 </div>

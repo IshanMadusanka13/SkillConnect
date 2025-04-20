@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, TrashIcon, PencilIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, ChevronUpIcon, TrashIcon, PencilIcon, ShareIcon } from '@heroicons/react/outline';
 import ProgressBar from './ProgressBar';
 import { api } from '../../utils/api';
 
@@ -12,6 +12,8 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
   });
   const [newItemTitle, setNewItemTitle] = useState('');
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareContent, setShareContent] = useState('');
   
   const handleEdit = () => {
     setIsEditing(true);
@@ -147,6 +149,86 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
       console.error('Error deleting item:', error);
       alert('Failed to delete item. Please try again.');
       if (onUpdate) onUpdate(null, true);
+    }
+  };
+
+  const handleSharePlan = () => {
+    // Calculate progress statistics
+    const completedItems = plan.items.filter(item => item.complete);
+    const pendingItems = plan.items.filter(item => !item.complete);
+    const totalItems = plan.items.length;
+    const progressPercentage = Math.round(plan.status);
+    
+    // Format the completed and pending items as bullet points
+    const completedItemsList = completedItems.length > 0 
+      ? completedItems.map(item => `✅ ${item.title}`).join('\n') 
+      : 'No completed items yet';
+      
+    const pendingItemsList = pendingItems.length > 0 
+      ? pendingItems.map(item => `⏳ ${item.title}`).join('\n') 
+      : 'All items completed!';
+    
+    // Create a visually appealing progress bar with emojis
+    const progressBarLength = 10;
+    const filledBlocks = Math.round((progressPercentage / 100) * progressBarLength);
+    const emptyBlocks = progressBarLength - filledBlocks;
+    const progressBar = '🟦'.repeat(filledBlocks) + '⬜'.repeat(emptyBlocks);
+    
+    // Generate a motivational message based on progress
+    let motivationalMessage = '';
+    if (progressPercentage === 0) {
+      motivationalMessage = "Just getting started on my learning journey! 🌱";
+    } else if (progressPercentage < 25) {
+      motivationalMessage = "Taking my first steps toward mastery! 🚶";
+    } else if (progressPercentage < 50) {
+      motivationalMessage = "Making steady progress on my learning goals! 🌟";
+    } else if (progressPercentage < 75) {
+      motivationalMessage = "More than halfway there! The momentum is building! 🚀";
+    } else if (progressPercentage < 100) {
+      motivationalMessage = "Almost there! The finish line is in sight! 🏁";
+    } else {
+      motivationalMessage = "Mission accomplished! Knowledge acquired! 🎓";
+    }
+    
+    // Format the start and end dates if available
+    const startDateFormatted = plan.startDate ? new Date(plan.startDate).toLocaleDateString() : 'Not specified';
+    const endDateFormatted = plan.endDate ? new Date(plan.endDate).toLocaleDateString() : 'Ongoing';
+    
+    // Create the share content with a visually structured format
+    const defaultContent = 
+      `📚 𝗟𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗣𝗟𝗔𝗡 𝗨𝗣𝗗𝗔𝗧𝗘 📚\n\n` +
+      `🔷 ${plan.title.toUpperCase()} 🔷\n\n` +
+      `${plan.description || 'No description provided.'}\n\n` +
+      `📊 𝗣𝗥𝗢𝗚𝗥𝗘𝗦𝗦: ${progressPercentage}% 📊\n` +
+      `${progressBar}\n\n` +
+      `${motivationalMessage}\n\n` +
+      `⏱️ 𝗧𝗶𝗺𝗲𝗹𝗶𝗻𝗲: ${startDateFormatted} to ${endDateFormatted}\n\n` +
+      `✨ 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗 𝗧𝗔𝗦𝗞𝗦 (${completedItems.length}/${totalItems}) ✨\n` +
+      `${completedItemsList}\n\n` +
+      `🔜 𝗨𝗣 𝗡𝗘𝗫𝗧 🔜\n` +
+      `${pendingItemsList}\n\n` +
+      `#SkillConnect #LearningJourney #${plan.title.replace(/\s+/g, '')}`;
+
+    
+    setShareContent(defaultContent);
+    setIsSharing(true);
+  };
+  
+  
+  const handleShareSubmit = async () => {
+    try {
+      const postData = {
+        title: `Learning Plan: ${plan.title}`,
+        description: shareContent,
+        user: { userId: plan.user.userId }
+      };
+      
+      await api.createPost(postData);
+      setIsSharing(false);
+      alert('Your learning plan has been shared successfully!');
+    } catch (error) {
+      console.error('Error sharing learning plan:', error);
+      alert('Failed to share learning plan. Please try again.');
     }
   };
   
@@ -305,6 +387,15 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
+                    handleSharePlan();
+                  }}
+                  className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors duration-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                >
+                  <ShareIcon className="h-4 w-4" />
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleEdit();
                   }}
                   className="p-1.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
@@ -324,6 +415,56 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
             </div>
           )}
         </>
+      )}
+
+      {/* Share Plan Modal */}
+      {isSharing && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Share Learning Plan</h3>
+                
+                <div className="mb-4">
+                  <label htmlFor="shareContent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Post Content
+                  </label>
+                  <textarea
+                    id="shareContent"
+                    value={shareContent}
+                    onChange={(e) => setShareContent(e.target.value)}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsSharing(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                  >
+                    Cancel
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={handleShareSubmit}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

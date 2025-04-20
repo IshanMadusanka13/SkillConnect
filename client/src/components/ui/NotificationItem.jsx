@@ -14,7 +14,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete }) => {
 
   return (
     <div 
-      className={`p-4 flex items-start ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}
+      className={`p-4 flex items-start ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}
     >
       <div className="flex-shrink-0 mr-4">
         <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">

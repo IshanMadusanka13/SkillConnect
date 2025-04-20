@@ -114,7 +114,7 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-blue-900 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <img src="/assets/images/logo.svg" alt="SkillSync Logo" className="h-16 w-16 mx-auto" />
+          <img src="/assets/images/logo.svg" alt="SkillSync Logo" className="h-20 w-20 mx-auto" />
           <h1 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">Join SkillSync</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-300">Create an account to start your learning journey</p>
         </div>
