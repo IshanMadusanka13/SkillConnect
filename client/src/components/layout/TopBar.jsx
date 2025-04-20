@@ -80,8 +80,39 @@ const TopBar = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
+  const validateVideoLength = (file) => {
+    return new Promise((resolve, reject) => {
+      // Only check video files
+      if (!file.type.startsWith('video/')) {
+        resolve(true);
+        return;
+      }
+  
+      // Create a temporary video element to check duration
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+  
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        
+        // Check if video is longer than 30 seconds
+        if (video.duration > 30) {
+          reject(new Error('Video must be 30 seconds or less'));
+        } else {
+          resolve(true);
+        }
+      };
+  
+      video.onerror = () => {
+        reject(new Error('Could not load video metadata'));
+      };
+  
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
   // Handle file selection
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const files = Array.from(e.target.files);
 
     // Validate file count
@@ -99,16 +130,29 @@ const TopBar = () => {
       alert('Only images and videos are allowed');
     }
 
-    // Add preview URLs for the files
-    const newMediaFiles = validFiles.map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      type: file.type.startsWith('image/') ? 'image' : 'video',
-      uploading: false,
-      url: null
-    }));
-
-    setMediaFiles([...mediaFiles, ...newMediaFiles]);
+    // Process each file
+  for (const file of validFiles) {
+    try {
+      // Check video duration if it's a video file
+      if (file.type.startsWith('video/')) {
+        await validateVideoLength(file);
+      }
+      
+      // Add file to mediaFiles state
+      const newMediaFile = {
+        file,
+        preview: URL.createObjectURL(file),
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        uploading: false,
+        url: null
+      };
+      
+      setMediaFiles(prevFiles => [...prevFiles, newMediaFile]);
+    } catch (error) {
+      alert(error.message);
+      // Skip this file
+    }
+  }
   };
 
   // Remove a media file
