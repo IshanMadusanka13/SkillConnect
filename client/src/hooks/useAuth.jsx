@@ -14,13 +14,15 @@ export const AuthProvider = ({ children }) => {
     const email = localStorage.getItem('userEmail');
     if (token) {
       api.getCurrentUser(email)
-        .then(user => {
+      .then(user => {
           setCurrentUser(user);
           
         })
         .catch(err => {
           console.error('Failed to fetch user:', err);
-          localStorage.removeItem('token');
+
+          //localStorage.removeItem('token');
+          window.location.href = '/login';
         })
         .finally(() => {
           setLoading(false);
