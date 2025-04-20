@@ -262,17 +262,17 @@ const Progress = () => {
     
     // Create the share content
     const content = 
-      `${achievementEmoji} ACHIEVEMENT UNLOCKED ${achievementEmoji}\n\n` +
+      `${achievementEmoji} 𝗔𝗖𝗛𝗜𝗘𝗩𝗘𝗠𝗘𝗡𝗧 𝗨𝗡𝗟𝗢𝗖𝗞𝗘𝗗 ${achievementEmoji}\n\n` +
       `🌟 ${achievement.title.toUpperCase()} 🌟\n\n` +
       `${achievement.description || 'I\'m leveling up my skills!'}\n\n` +
-      `📊 PROGRESS: ${achievement.completionPercentage}% 📊\n` +
+      `📊 𝗣𝗥𝗢𝗚𝗥𝗘𝗦𝗦: ${achievement.completionPercentage}% 📊\n` +
       `${progressBar}\n\n` +
       `${celebrationMessage}\n\n` +
-      `📋 DETAILS 📋\n` +
-      `Type: ${achievement.type || 'Learning'}\n` +
-      `Category: ${achievement.category || 'Skill Development'}\n` +
-      `Level: ${achievement.level || 'N/A'}\n` +
-      `Date: ${achievementDate}\n\n` +
+      `📋 𝗗𝗘𝗧𝗔𝗜𝗟𝗦 📋\n` +
+      `𝗧𝘆𝗽𝗲: ${achievement.type || 'Learning'}\n` +
+      `𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${achievement.category || 'Skill Development'}\n` +
+      `𝗟𝗲𝘃𝗲𝗹: ${achievement.level || 'N/A'}\n` +
+      `𝗗𝗮𝘁𝗲: ${achievementDate}\n\n` +
       `#SkillConnect #Achievement #${(achievement.category || 'Learning').replace(/\s+/g, '')}`;
     
     setShareContent(content);

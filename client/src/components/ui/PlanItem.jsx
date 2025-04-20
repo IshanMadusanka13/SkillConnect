@@ -196,18 +196,19 @@ const PlanItem = ({ plan, onUpdate, onDelete }) => {
     
     // Create the share content with a visually structured format
     const defaultContent = 
-      `📚 LEARNING PLAN UPDATE 📚\n\n` +
+      `📚 𝗟𝗘𝗔𝗥𝗡𝗜𝗡𝗚 𝗣𝗟𝗔𝗡 𝗨𝗣𝗗𝗔𝗧𝗘 📚\n\n` +
       `🔷 ${plan.title.toUpperCase()} 🔷\n\n` +
       `${plan.description || 'No description provided.'}\n\n` +
-      `📊 PROGRESS: ${progressPercentage}% 📊\n` +
+      `📊 𝗣𝗥𝗢𝗚𝗥𝗘𝗦𝗦: ${progressPercentage}% 📊\n` +
       `${progressBar}\n\n` +
       `${motivationalMessage}\n\n` +
-      `⏱️ Timeline: ${startDateFormatted} to ${endDateFormatted}\n\n` +
-      `✨ COMPLETED TASKS (${completedItems.length}/${totalItems}) ✨\n` +
+      `⏱️ 𝗧𝗶𝗺𝗲𝗹𝗶𝗻𝗲: ${startDateFormatted} to ${endDateFormatted}\n\n` +
+      `✨ 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗 𝗧𝗔𝗦𝗞𝗦 (${completedItems.length}/${totalItems}) ✨\n` +
       `${completedItemsList}\n\n` +
-      `🔜 UP NEXT 🔜\n` +
+      `🔜 𝗨𝗣 𝗡𝗘𝗫𝗧 🔜\n` +
       `${pendingItemsList}\n\n` +
       `#SkillConnect #LearningJourney #${plan.title.replace(/\s+/g, '')}`;
+
     
     setShareContent(defaultContent);
     setIsSharing(true);
