@@ -124,7 +124,7 @@ const TopBar = () => {
 
   // Upload files to Supabase
   const uploadFilesToSupabase = async () => {
-    if (mediaFiles.length === 0) return [];
+    if (mediaFiles.length === 0) return ['', '', ''];
 
     setIsUploading(true);
     const mediaUrls = [];
@@ -169,6 +169,12 @@ const TopBar = () => {
 
         // Update progress
         setUploadProgress(((i + 1) / mediaFiles.length) * 100);
+      }
+      if (mediaUrls.length < 3) {
+        mediaUrls.push({
+          url: '',
+          type: ''
+        });
       }
 
       return mediaUrls;
@@ -247,12 +253,12 @@ const TopBar = () => {
         }
       }
     };
-  
+
     fetchUnreadNotifications();
-    
+
     // Set up polling to check for new notifications every minute
     const intervalId = setInterval(fetchUnreadNotifications, 60000);
-    
+
     return () => clearInterval(intervalId);
   }, [currentUser]);
 
@@ -422,7 +428,7 @@ const TopBar = () => {
                   <MoonIcon className="h-6 w-6" />
                 )}
               </button>
-              
+
               <Link to="/notifications">
                 <button className="relative p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-slate-700">
                   <BellIcon className="h-6 w-6" />
@@ -440,7 +446,7 @@ const TopBar = () => {
                   onClick={() => setShowCreatePostModal(true)}
                   className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
                 >
-                  
+
                   <span className="mr-2">+</span> Create Post
                 </button>
               )}
