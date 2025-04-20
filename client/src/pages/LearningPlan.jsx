@@ -181,7 +181,7 @@ const LearningPlan = () => {
             {learningPlans.map(plan => (
               <PlanItem 
                 key={plan.planId} 
-                plan={plan} 
+                plan={{...plan, user: { userId: currentUser.userId }}} 
                 onUpdate={handlePlanUpdate}
                 onDelete={fetchLearningPlans}
               />

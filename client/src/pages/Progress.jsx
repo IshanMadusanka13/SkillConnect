@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { api } from '../utils/api';
 import { 
   PlusIcon, FilterIcon, AcademicCapIcon, BookOpenIcon, 
-  ClipboardCheckIcon, BadgeCheckIcon, XIcon 
+  ClipboardCheckIcon, BadgeCheckIcon, XIcon, ShareIcon 
 } from '@heroicons/react/outline';
 
 const Progress = () => {
@@ -17,6 +17,9 @@ const Progress = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareContent, setShareContent] = useState('');
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [newUpdateData, setNewUpdateData] = useState({
     title: '',
     description: '',
@@ -225,6 +228,73 @@ const Progress = () => {
       setError('Failed to apply filters. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleShareAchievement = (achievement) => {
+    setSelectedAchievement(achievement);
+    
+    // Generate emoji based on achievement type
+    let achievementEmoji = '🏆';
+    if (achievement.type === 'Tutorial') achievementEmoji = '📚';
+    else if (achievement.type === 'Exam') achievementEmoji = '📝';
+    else if (achievement.type === 'Project') achievementEmoji = '🛠️';
+    else if (achievement.type === 'Certificate') achievementEmoji = '🎓';
+    
+    // Create a visually appealing progress bar with emojis
+    const progressBarLength = 10;
+    const filledBlocks = Math.round((achievement.completionPercentage / 100) * progressBarLength);
+    const emptyBlocks = progressBarLength - filledBlocks;
+    const progressBar = '🟩'.repeat(filledBlocks) + '⬜'.repeat(emptyBlocks);
+    
+    // Generate a celebratory message
+    let celebrationMessage = '';
+    if (achievement.completionPercentage === 100) {
+      celebrationMessage = "I've completed this learning goal! 🎉";
+    } else {
+      celebrationMessage = `I'm making great progress on this learning goal! ${achievement.completionPercentage}% complete 🚀`;
+    }
+    
+    // Format the date
+    const achievementDate = achievement.updatedAt 
+      ? new Date(achievement.updatedAt).toLocaleDateString() 
+      : new Date().toLocaleDateString();
+    
+    // Create the share content
+    const content = 
+      `${achievementEmoji} ACHIEVEMENT UNLOCKED ${achievementEmoji}\n\n` +
+      `🌟 ${achievement.title.toUpperCase()} 🌟\n\n` +
+      `${achievement.description || 'I\'m leveling up my skills!'}\n\n` +
+      `📊 PROGRESS: ${achievement.completionPercentage}% 📊\n` +
+      `${progressBar}\n\n` +
+      `${celebrationMessage}\n\n` +
+      `📋 DETAILS 📋\n` +
+      `Type: ${achievement.type || 'Learning'}\n` +
+      `Category: ${achievement.category || 'Skill Development'}\n` +
+      `Level: ${achievement.level || 'N/A'}\n` +
+      `Date: ${achievementDate}\n\n` +
+      `#SkillConnect #Achievement #${(achievement.category || 'Learning').replace(/\s+/g, '')}`;
+    
+    setShareContent(content);
+    setShowShareModal(true);
+  };
+  
+  const handleShareSubmit = async () => {
+    if (!selectedAchievement) return;
+    
+    try {
+      const postData = {
+        title: `Achievement: ${selectedAchievement.title}`,
+        description: shareContent,
+        user: { userId: currentUser.userId }
+      };
+      
+      await api.createPost(postData);
+      setShowShareModal(false);
+      alert('Your achievement has been shared successfully!');
+    } catch (error) {
+      console.error('Error sharing achievement:', error);
+      alert('Failed to share achievement. Please try again.');
     }
   };
   
@@ -827,7 +897,9 @@ const Progress = () => {
                         </p>
                       </div>
                       <div>
-                        <button className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800">
+                        <button 
+                          onClick={() => handleShareAchievement(achievement)}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800">
                           Share
                         </button>
                       </div>
@@ -844,6 +916,55 @@ const Progress = () => {
             </div>
           </div>
         </div>
+        {/* Share Achievement Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+            </div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Share Achievement</h3>
+                
+                <div className="mb-4">
+                  <label htmlFor="shareContent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Post Content
+                  </label>
+                  <textarea
+                    id="shareContent"
+                    value={shareContent}
+                    onChange={(e) => setShareContent(e.target.value)}
+                    rows={8}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowShareModal(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                  >
+                    Cancel
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={handleShareSubmit}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       </AppShell>
     );
   };

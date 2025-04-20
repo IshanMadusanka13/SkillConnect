@@ -228,7 +228,7 @@ const PostCard = ({ post, onPostUpdate }) => {
         {postTitle && (
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{postTitle}</h2>
         )}
-        <p className="text-gray-700 dark:text-gray-300 mb-4">{postContent}</p>
+        <p className="text-gray-700 dark:text-gray-300 mb-4 whitespace-pre-line">{postContent}</p>
 
 
         {(post.media1 || post.media2 || post.media3) && (

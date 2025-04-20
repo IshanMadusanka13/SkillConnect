@@ -448,8 +448,9 @@ const TopBar = () => {
               <div className="relative">
                 <Link to="/profile">
                   <button className="flex rounded-full bg-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700">
+                  <div className="h-7 w-7 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-slate-700">
                     <img
-                      className="h-8 w-8 rounded-full border-2 border-white dark:border-slate-700 object-cover overflow-hidden"
+                      className="h-full w-full object-cover"
                       src={profileImage}
                       alt={currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "User avatar"}
                       onError={(e) => {
@@ -457,6 +458,7 @@ const TopBar = () => {
                         e.target.src = defaultAvatar;
                       }}
                     />
+                  </div>
                   </button>
                 </Link>
                 {currentUser && (
