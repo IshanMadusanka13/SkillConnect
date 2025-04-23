@@ -168,10 +168,15 @@ const TopBar = () => {
 
   // Upload files to Supabase
   const uploadFilesToSupabase = async () => {
-    if (mediaFiles.length === 0) return ['', '', ''];
+    const mediaUrls = [
+      { url: '', type: '' },
+      { url: '', type: '' },
+      { url: '', type: '' }
+    ];
+    if (mediaFiles.length === 0) return mediaUrls;
 
     setIsUploading(true);
-    const mediaUrls = [];
+    
 
     if (!supabase) {
       console.error('Supabase client not initialized');
@@ -206,20 +211,20 @@ const TopBar = () => {
           .from('skillconnect')
           .getPublicUrl(filePath);
 
-        mediaUrls.push({
-          url: urlData.publicUrl,
-          type: mediaFile.type
-        });
+          mediaUrls[i] = {
+            url: urlData.publicUrl,
+            type: mediaFile.type
+          };
 
         // Update progress
         setUploadProgress(((i + 1) / mediaFiles.length) * 100);
       }
-      if (mediaUrls.length < 3) {
-        mediaUrls.push({
-          url: '',
-          type: ''
-        });
-      }
+      // if (mediaUrls.length < 3) {
+      //   mediaUrls.push({
+      //     url: '',
+      //     type: ''
+      //   });
+      // }
 
       return mediaUrls;
     } catch (error) {
