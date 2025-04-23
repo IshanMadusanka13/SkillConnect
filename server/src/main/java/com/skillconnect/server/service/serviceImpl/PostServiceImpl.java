@@ -3,6 +3,8 @@ package com.skillconnect.server.service.serviceImpl;
 import com.skillconnect.server.model.Follow;
 import com.skillconnect.server.model.Post;
 import com.skillconnect.server.model.User;
+import com.skillconnect.server.repository.CommentRepository;
+import com.skillconnect.server.repository.LikeRepository;
 import com.skillconnect.server.repository.PostRepository;
 import com.skillconnect.server.repository.UserRepository;
 import com.skillconnect.server.service.FollowService;
@@ -24,12 +26,16 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FollowService followService;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, FollowService followService) {
+    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, FollowService followService, LikeRepository likeRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.followService = followService;
+        this.likeRepository = likeRepository;
+        this.commentRepository = commentRepository;
         log.info("PostServiceImpl initialized");
     }
 
@@ -87,6 +93,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(int postId) {
         log.info("Deleting post with ID: {}", postId);
+        commentRepository.deleteByPost_PostId(postId);
+        likeRepository.deleteByPost_PostId(postId);
         postRepository.deleteById(postId);
         log.info("Post deleted successfully: {}", postId);
     }
